@@ -1,0 +1,24 @@
+# Dependencies (none today, but in case any get added)
+node_modules/
+
+# Vercel CLI
+.vercel/
+
+# Environment files
+.env
+.env*.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# Claude Code personal settings (launch.json stays shared)
+.claude/settings.local.json
+
+# OS / editor junk
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.swp
