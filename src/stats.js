@@ -7,7 +7,7 @@
 
 import { PIECE_IDS, confusablePartner } from './pieces.js';
 
-const STORAGE_KEY = 'tetromino-trainer:stats:v1';
+const STORAGE_KEY = 'tetrain:stats:v1';
 const RECENT_WINDOW = 10;
 
 function emptyPieceStats() {

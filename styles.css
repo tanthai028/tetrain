@@ -1,4 +1,4 @@
-/* Tetromino Trainer — UI chrome only. Piece colors come from src/pieces.js
+/* Tetrain — UI chrome only. Piece colors come from src/pieces.js
    and reach the DOM through the --c / --accent custom properties. */
 
 :root {

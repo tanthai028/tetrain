@@ -1,4 +1,6 @@
-# Tetromino Trainer
+# Tetrain
+
+**Live: https://tetrain.vercel.app**
 
 A small web app that drills the Tetris Guideline piece colors and shapes until
 you recognize every piece, in every rotation, instantly.
@@ -21,6 +23,36 @@ Then open http://localhost:5173. The rotation test page is at http://localhost:5
 
 Opening `index.html` straight from disk won't work in most browsers, because they block ES modules on `file://` URLs.
 Any static server works too, e.g. `npx serve` or `python -m http.server`.
+
+## Deploy (Vercel)
+
+It's a static site with no build step. `vercel.json` tells Vercel to skip install and build and serve the repo root as-is. Vercel's free **Hobby** plan covers it (personal, non-commercial use).
+
+### First-time setup
+
+1. **Push to `main`.** Vercel publishes the repo's default branch to the live address. Other branches only get preview links.
+2. **Create an account.** Go to [vercel.com](https://vercel.com), sign up for **Hobby**, and choose **Continue with GitHub**.
+3. **Import the repo.** Choose **Add New… → Project**, find this repo, and choose **Import**. If it isn't listed, choose **Adjust GitHub App Permissions** and give Vercel access to it.
+4. **Configure:**
+   - **Project Name:** `tetrain`. This sets the `tetrain.vercel.app` address.
+   - **Framework Preset:** Other.
+   - **Root Directory:** `./`
+   - Leave Build and Output Settings alone. `vercel.json` handles them.
+5. **Deploy**, then check:
+   - https://tetrain.vercel.app loads and Learn / Quiz / Stats work.
+   - https://tetrain.vercel.app/test.html says all 7 pieces pass.
+
+If the address came out as something like `tetrain-abc123.vercel.app`, the name was already taken. Try adding `tetrain.vercel.app` under **Project → Settings → Domains**. If it's unavailable, pick another name and update the address in `index.html` (the `canonical` link) and at the top of this README.
+
+### Updating
+
+Commit and push to `main`, and Vercel redeploys within seconds. Pushes to other branches get their own preview link and don't touch the live site.
+
+### Troubleshooting
+
+- **404 or blank page:** under **Settings → Build & Deployment**, Build Command should be empty and Output Directory should be `.` (or empty).
+- **Old version still showing:** check the **Deployments** tab to confirm the deploy came from `main`, then hard-refresh (Ctrl+Shift+R).
+- **The wrong branch is live:** set **Settings → Environments → Production → Branch Tracking** to `main`.
 
 ## Tests
 

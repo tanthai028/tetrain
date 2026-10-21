@@ -31,6 +31,6 @@ createServer(async (req, res) => {
     res.writeHead(404).end('Not found');
   }
 }).listen(PORT, () => {
-  console.log(`Tetromino Trainer → http://localhost:${PORT}`);
+  console.log(`Tetrain → http://localhost:${PORT}`);
   console.log(`Rotation test page → http://localhost:${PORT}/test.html`);
 });

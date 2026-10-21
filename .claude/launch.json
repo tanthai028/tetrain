@@ -2,7 +2,7 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "tetromino-trainer",
+      "name": "tetrain",
       "runtimeExecutable": "node",
       "runtimeArgs": ["serve.js"],
       "port": 5173
