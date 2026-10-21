@@ -16,6 +16,8 @@ const MODES = [
   { id: 'stats', label: 'Stats', create: createStatsMode },
 ];
 
+const LAST_TAB_KEY = 'tetrain:last-tab';
+
 const nav = document.getElementById('nav');
 const main = document.getElementById('main');
 const instances = {};
@@ -35,7 +37,13 @@ function show(id) {
   current = mode.id;
   for (const tab of nav.children) tab.classList.toggle('is-active', tab.dataset.mode === mode.id);
   window.scrollTo(0, 0);
+  try { localStorage.setItem(LAST_TAB_KEY, mode.id); } catch { /* storage unavailable */ }
+}
+
+// Returning players land on the tab they used last.
+function lastTab() {
+  try { return localStorage.getItem(LAST_TAB_KEY); } catch { return null; }
 }
 
 window.addEventListener('hashchange', () => show(location.hash.slice(1)));
-show(location.hash.slice(1) || 'learn');
+show(location.hash.slice(1) || lastTab() || 'learn');

@@ -8,7 +8,7 @@ import { h, formatMs, formatPct } from '../dom.js';
 
 export function createStatsMode(app) {
   const body = h('div');
-  const el = h('section', { class: 'mode mode-stats' }, h('h2', {}, 'Your stats'), body);
+  const el = h('section', { class: 'mode mode-stats' }, body);
 
   function draw() {
     const { stats } = app;
@@ -51,7 +51,6 @@ export function createStatsMode(app) {
           h('tbody', {}, ...rows),
         ),
       ),
-      h('p', { class: 'lede' }, 'Pieces under 70% accuracy are highlighted. The quiz asks about weaker pieces more often.'),
       resetBtn,
     );
   }

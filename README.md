@@ -1,12 +1,12 @@
-# Tetrain
+# tetrain.gg
 
-**Play it at [tetrain.vercel.app](https://tetrain.vercel.app).**
+**Play it at [tetrain-gg.vercel.app](https://tetrain-gg.vercel.app).**
 
-Tetrain helps you memorize the Tetris Guideline piece colors and shapes until you recognize every piece, in any rotation, instantly. It works on desktop and on your phone.
+tetrain.gg helps you memorize the Tetris Guideline piece colors and shapes until you recognize every piece, in any rotation, instantly. It works on desktop and on your phone.
 
 ## Modes
 
-- **Learn:** all 7 pieces with their color, name and memory hint. Rotate them (or hover on desktop) to see every orientation. The two mirror pairs beginners mix up, J/L (blue/orange) and S/Z (green/red), are explained side by side.
+- **Learn:** all 7 pieces in every rotation at a glance. Hover or tap a piece for its memory hint. The two mirror pairs beginners mix up, J/L (blue/orange) and S/Z (green/red), sit side by side; tap them for how to tell them apart.
 - **Quiz:** three kinds of question, always at a random rotation:
   - **Shape → Color:** a gray piece; pick its color.
   - **Color → Shape:** a color; pick the matching gray piece.
@@ -17,7 +17,7 @@ Tetrain helps you memorize the Tetris Guideline piece colors and shapes until yo
 
 **Keyboard:** press **1–7** to answer.
 
-Your stats are saved in your own browser only. Clearing site data or switching browsers or devices starts you fresh. **Reset stats** clears them on purpose.
+Your stats are saved in your own browser only. Clearing site data or switching browsers or devices starts you fresh. **Reset stats** on the Stats page clears them on purpose. The app reopens on the tab you used last.
 
 ## The pieces
 
@@ -51,7 +51,7 @@ npm test
 
 The tests use Node's built-in test runner. They check that every piece has exactly 4 cells in all 4 rotations, that each rotation is the previous one turned clockwise, that the colors match the guideline, and that board placement and stats weighting work. `/test.html` shows every piece in every rotation for a visual check.
 
-**Deploys:** every push to `main` goes live at tetrain.vercel.app through Vercel. Other branches get preview links. `vercel.json` tells Vercel to serve the repo root as-is, minus the dev files listed in `.vercelignore`.
+**Deploys:** every push to `main` goes live at tetrain-gg.vercel.app through Vercel. Other branches get preview links. `vercel.json` tells Vercel to serve the repo root as-is, minus the dev files listed in `.vercelignore`.
 
 ### Where the piece data lives
 

@@ -3,13 +3,13 @@
 
 import { PIECE_IDS, PIECES } from '../pieces.js';
 import { renderPiece, renderSwatch } from '../render.js';
-import { recordAnswer, saveStats, pickWeighted, resetStats } from '../stats.js';
+import { recordAnswer, saveStats, pickWeighted } from '../stats.js';
 import { h, formatMs, formatPct } from '../dom.js';
 
 export const QUESTION_TYPES = {
-  'shape-color': { label: 'Shape → Color', prompt: 'What color is this piece?' },
-  'color-shape': { label: 'Color → Shape', prompt: 'Which piece has this color?' },
-  'shape-name': { label: 'Shape → Name', prompt: 'Which piece is this?' },
+  'shape-color': { label: 'Shape → Color', prompt: 'What color?' },
+  'color-shape': { label: 'Color → Shape', prompt: 'Which piece?' },
+  'shape-name': { label: 'Shape → Name', prompt: 'Which letter?' },
 };
 const TYPE_ORDER = Object.keys(QUESTION_TYPES);
 
@@ -49,14 +49,6 @@ export function createQuizMode(app) {
   const speedBtn = h('button', { class: 'btn btn--accent', type: 'button' }, '⚡ 60s speed round');
   speedBtn.addEventListener('click', () => (speed.active ? endSpeedRound(true) : startSpeedRound()));
 
-  const resetBtn = h('button', { class: 'btn btn--ghost', type: 'button' }, 'Reset stats');
-  resetBtn.addEventListener('click', () => {
-    if (!confirm('Reset all saved quiz stats?')) return;
-    app.stats = resetStats();
-    Object.assign(session, { streak: 0, attempts: 0, correct: 0, totalMs: 0 });
-    updateScoreboard();
-  });
-
   const stat = (label) => {
     const value = h('span', { class: 'stat__value' }, '–');
     return { value, el: h('div', { class: 'stat' }, value, h('span', { class: 'stat__label' }, label)) };
@@ -68,19 +60,17 @@ export function createQuizMode(app) {
   const scoreboard = h('div', { class: 'scoreboard' }, sStreak.el, sAcc.el, sTime.el, sBest.el);
 
   const speedBar = h('div', { class: 'speed-bar', hidden: true });
-  const typeTag = h('div', { class: 'q-type' });
   const promptText = h('p', { class: 'q-prompt' });
   const stage = h('div', { class: 'q-stage' });
   const feedback = h('div', { class: 'feedback', 'aria-live': 'polite' });
   const options = h('div', { class: 'options' });
 
   const el = h('section', { class: 'mode mode-quiz' },
-    h('div', { class: 'quiz-toolbar' }, typeSelect, speedBtn, resetBtn),
+    h('div', { class: 'quiz-toolbar' }, typeSelect, speedBtn),
     scoreboard,
     speedBar,
-    h('div', { class: 'q-card' }, typeTag, promptText, stage, feedback),
+    h('div', { class: 'q-card' }, promptText, stage, feedback),
     options,
-    h('p', { class: 'kbd-hint' }, 'Tip: press keys 1–7 to answer.'),
   );
 
   // ---- Question flow ---------------------------------------------------
@@ -134,7 +124,6 @@ export function createQuizMode(app) {
     locked = false;
     pendingResume = null;
     question = buildQuestion();
-    typeTag.textContent = QUESTION_TYPES[question.type].label;
     promptText.textContent = QUESTION_TYPES[question.type].prompt;
     feedback.textContent = '';
     feedback.className = 'feedback';
@@ -172,7 +161,6 @@ export function createQuizMode(app) {
 
   function showFeedback(answeredId, correct, ms) {
     const { target, type } = question;
-    const t = PIECES[target];
     // Reveal the correct answer in color.
     renderPrompt(true);
     question.options.forEach((opt, i) => {
@@ -189,14 +177,9 @@ export function createQuizMode(app) {
       }
     });
 
-    if (correct) {
-      feedback.className = 'feedback feedback--ok';
-      feedback.textContent = `✓ ${target} = ${t.colorName} · ${formatMs(ms)}`;
-    } else {
-      const a = PIECES[answeredId];
-      feedback.className = 'feedback feedback--bad';
-      feedback.textContent = `✗ It's ${target} = ${t.colorName}. You picked ${type === 'shape-color' ? a.colorName : answeredId}.`;
-    }
+    // The colored prompt and highlighted option already show the answer.
+    feedback.className = `feedback ${correct ? 'feedback--ok' : 'feedback--bad'}`;
+    feedback.textContent = correct ? `✓ ${formatMs(ms)}` : '✗';
   }
 
   function updateScoreboard() {
@@ -241,8 +224,6 @@ export function createQuizMode(app) {
     clearTimeout(advanceTimer);
     locked = true;
     speedBar.textContent = `Time! ${speed.score} correct in 60s${isBest ? ' · 🏆 new best!' : ` · best ${app.stats.bestSpeedRound}`}`;
-    feedback.className = 'feedback';
-    feedback.textContent = 'Speed round over. Press any number key or tap to keep practicing.';
     const resume = () => { speedBar.hidden = true; nextQuestion(); };
     options.replaceChildren(h('button', { class: 'btn btn--accent', type: 'button', onclick: resume }, 'Continue'));
     pendingResume = resume;
