@@ -35,9 +35,10 @@ export function renderBoard(board, { cellSize = '28px', showGrid = false, classN
   return el;
 }
 
-// Options: gray (draw in neutral gray), srsBox (keep SRS bounding box), cellSize.
-export function renderPiece(pieceId, rotation, { gray = false, srsBox = false, ...opts } = {}) {
-  const board = boardForPiece(pieceId, rotation, { value: gray ? GRAY : pieceId, srsBox });
+// Options: gray (draw in neutral gray), frame (4×4 spawn frame), srsBox (keep
+// SRS bounding box), plus renderBoard's options (cellSize, showGrid…).
+export function renderPiece(pieceId, rotation, { gray = false, srsBox = false, frame = false, ...opts } = {}) {
+  const board = boardForPiece(pieceId, rotation, { value: gray ? GRAY : pieceId, srsBox, frame });
   const el = renderBoard(board, opts);
   el.dataset.piece = pieceId;
   el.setAttribute('role', 'img');

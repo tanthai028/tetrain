@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { PIECES, PIECE_IDS, CONFUSABLE_PAIRS, normalizedCells } from '../src/pieces.js';
+import { PIECES, PIECE_IDS, CONFUSABLE_PAIRS, SPAWN_FRAME_SIZE, framedCells, normalizedCells } from '../src/pieces.js';
 
 const key = (cells) => cells.map(([x, y]) => `${x},${y}`).sort().join(' ');
 const rotateCW = (cells, n) => cells.map(([x, y]) => [n - 1 - y, x]);
@@ -84,4 +84,21 @@ test('confusable pairs are mirror images of each other', () => {
   for (const { ids: [a, b] } of CONFUSABLE_PAIRS) {
     assert.equal(key(mirror(normalizedCells(a, 0))), key(normalizedCells(b, 0)), `${a}/${b}`);
   }
+});
+
+test('every rotation fits the 4×4 spawn frame, aligned like in-game spawns', () => {
+  for (const id of PIECE_IDS) {
+    for (let r = 0; r < 4; r++) {
+      for (const [x, y] of framedCells(id, r)) {
+        assert.ok(x >= 0 && x < SPAWN_FRAME_SIZE && y >= 0 && y < SPAWN_FRAME_SIZE, `${id} r${r} ${x},${y}`);
+      }
+    }
+  }
+  // Flat spawn rows line up: I's row matches T's bottom row; O sits in the middle columns.
+  const rows = (id) => [...new Set(framedCells(id, 0).map(([, y]) => y))].sort();
+  const cols = (id) => [...new Set(framedCells(id, 0).map(([x]) => x))].sort();
+  assert.deepEqual(rows('I'), [1]);
+  assert.deepEqual(rows('T'), [0, 1]);
+  assert.deepEqual(cols('O'), [1, 2]);
+  assert.deepEqual(cols('T'), [0, 1, 2]);
 });

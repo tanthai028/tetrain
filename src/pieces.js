@@ -1,4 +1,4 @@
-// Single source of truth for tetromino colors, names, hints and shapes.
+// Single source of truth for tetromino colors, names, descriptions and shapes.
 // Every other module imports from here — no piece colors live anywhere else.
 //
 // Coordinates are [x, y] inside each piece's SRS bounding box (x → right,
@@ -10,6 +10,11 @@ export const PIECE_IDS = ['I', 'O', 'T', 'S', 'Z', 'J', 'L'];
 
 export const ROTATION_NAMES = ['0', 'R', '2', 'L'];
 
+// Every piece fits a 4×4 spawn frame. Each piece's SRS box sits in it at
+// `frameOffset`, which reproduces in-game spawn alignment: the 3-wide pieces
+// use the left 3 columns, I fills the frame, and O sits in the middle columns.
+export const SPAWN_FRAME_SIZE = 4;
+
 // Color for pieces shown "shape only" in quizzes.
 export const NEUTRAL_COLOR = '#8A8F98';
 
@@ -19,8 +24,8 @@ export const PIECES = {
     colorName: 'Cyan',
     hex: '#00F0F0',
     boxSize: 4,
+    frameOffset: [0, 0],
     description: '4 in a row',
-    hint: 'I = Cyan: I-ce. The long piece is an icicle.',
     rotations: [
       [[0, 1], [1, 1], [2, 1], [3, 1]],
       [[2, 0], [2, 1], [2, 2], [2, 3]],
@@ -33,8 +38,8 @@ export const PIECES = {
     colorName: 'Yellow',
     hex: '#F0F000',
     boxSize: 2,
+    frameOffset: [1, 0],
     description: '2×2 square',
-    hint: 'O = Yellow: a square sun. Rotating it changes nothing.',
     rotations: [
       [[0, 0], [1, 0], [0, 1], [1, 1]],
       [[0, 0], [1, 0], [0, 1], [1, 1]],
@@ -47,8 +52,8 @@ export const PIECES = {
     colorName: 'Purple',
     hex: '#A000F0',
     boxSize: 3,
-    description: '3 in a row + 1 center bump',
-    hint: 'T = Purple: the T is Tetris royalty (T-spins!), and purple is the royal color.',
+    frameOffset: [0, 0],
+    description: '3 in a row, bump in the middle',
     rotations: [
       [[1, 0], [0, 1], [1, 1], [2, 1]],
       [[1, 0], [1, 1], [2, 1], [1, 2]],
@@ -61,8 +66,8 @@ export const PIECES = {
     colorName: 'Green',
     hex: '#00F000',
     boxSize: 3,
-    description: 'Zigzag, rising to the right',
-    hint: 'S = Green: S is for Snake, and snakes are green.',
+    frameOffset: [0, 0],
+    description: 'Zigzag, rises to the right',
     rotations: [
       [[1, 0], [2, 0], [0, 1], [1, 1]],
       [[1, 0], [1, 1], [2, 1], [2, 2]],
@@ -75,8 +80,8 @@ export const PIECES = {
     colorName: 'Red',
     hex: '#F00000',
     boxSize: 3,
-    description: 'Zigzag, rising to the left',
-    hint: 'Z = Red: Z is a Zap of red lightning. Green S goes, red Z stops.',
+    frameOffset: [0, 0],
+    description: 'Zigzag, rises to the left',
     rotations: [
       [[0, 0], [1, 0], [1, 1], [2, 1]],
       [[2, 0], [1, 1], [2, 1], [1, 2]],
@@ -89,8 +94,8 @@ export const PIECES = {
     colorName: 'Blue',
     hex: '#0000F0',
     boxSize: 3,
-    description: '3 in a row + a hook on the left',
-    hint: 'J = Blue: stand it up and the hook curls LEFT, like a J. Think "Blue Jay".',
+    frameOffset: [0, 0],
+    description: '3 in a row, corner on the left',
     rotations: [
       [[0, 0], [0, 1], [1, 1], [2, 1]],
       [[1, 0], [2, 0], [1, 1], [1, 2]],
@@ -103,8 +108,8 @@ export const PIECES = {
     colorName: 'Orange',
     hex: '#F0A000',
     boxSize: 3,
-    description: '3 in a row + a hook on the right',
-    hint: 'L = Orange: stand it up and the foot kicks RIGHT, like an L. Orange is the right hook.',
+    frameOffset: [0, 0],
+    description: '3 in a row, corner on the right',
     rotations: [
       [[2, 0], [0, 1], [1, 1], [2, 1]],
       [[1, 0], [1, 1], [1, 2], [2, 2]],
@@ -118,11 +123,11 @@ export const PIECES = {
 export const CONFUSABLE_PAIRS = [
   {
     ids: ['J', 'L'],
-    tip: 'Mirror images. Stand the piece up with the long bar vertical: if the foot points LEFT it is J (blue), if it points RIGHT it is L (orange).',
+    tip: 'Mirror images. J’s corner is on the left, L’s is on the right.',
   },
   {
     ids: ['S', 'Z'],
-    tip: 'Mirror images. Lay it flat: if the top row sits to the RIGHT (rising like "/") it is S (green); if the top row sits to the LEFT (falling like "\\") it is Z (red).',
+    tip: 'Mirror images. S rises to the right, Z rises to the left.',
   },
 ];
 
@@ -142,6 +147,12 @@ export function confusablePartner(id) {
 // Cells for a rotation, as stored (relative to the SRS bounding box).
 export function rawCells(id, rotation) {
   return getPiece(id).rotations[mod4(rotation)];
+}
+
+// Cells positioned inside the 4×4 spawn frame (see SPAWN_FRAME_SIZE).
+export function framedCells(id, rotation) {
+  const [dx, dy] = getPiece(id).frameOffset;
+  return rawCells(id, rotation).map(([x, y]) => [x + dx, y + dy]);
 }
 
 // Cells shifted so the piece's own bounding box starts at [0, 0].

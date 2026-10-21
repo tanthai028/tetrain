@@ -17,7 +17,7 @@
 <body>
   <main>
     <h2>Visual test: every piece × every SRS rotation</h2>
-    <p class="lede">Drawn from <code>src/pieces.js</code> with the same renderer the app uses. Each cell shows the SRS box with a grid; the last column checks 4 cells per rotation.</p>
+    <p class="lede">Drawn from <code>src/pieces.js</code> with the same renderer the app uses. Each cell shows the piece in its 4×4 spawn frame; the last column checks 4 cells per rotation.</p>
     <p id="summary"></p>
     <div class="table-wrap"><table class="vt" id="vt"></table></div>
   </main>
@@ -35,7 +35,7 @@
       if (!ok) failures++;
       table.append(h('tr', {},
         h('th', {}, `${id} · ${PIECES[id].colorName} · ${PIECES[id].hex}`),
-        ...ROTATION_NAMES.map((_, r) => h('td', {}, renderPiece(id, r, { srsBox: true, showGrid: true, cellSize: '18px' }))),
+        ...ROTATION_NAMES.map((_, r) => h('td', {}, renderPiece(id, r, { frame: true, showGrid: true, cellSize: '18px' }))),
         h('td', {}, renderPiece(id, 1, { gray: true, cellSize: '18px' })),
         h('td', { class: ok ? 'cell-ok' : 'cell-bad' }, ok ? '✓ 4/4/4/4' : `✗ ${counts.join('/')}`),
       ));

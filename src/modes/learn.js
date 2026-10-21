@@ -1,5 +1,5 @@
-// Learn mode: all 7 pieces in every rotation at a glance. Memory hints and the
-// mirror-pair tips stay hidden until you hover (desktop) or tap a card.
+// Learn mode: all 7 pieces in every rotation at a glance. Shape descriptions and
+// the mirror-pair tips stay hidden until you hover (desktop) or tap a card.
 
 import { PIECE_IDS, PIECES, CONFUSABLE_PAIRS } from '../pieces.js';
 import { renderPiece } from '../render.js';
@@ -27,8 +27,8 @@ function pieceCard(id) {
     ),
     h('div', { class: 'rotations', 'aria-label': `${id} in all four rotations` },
       [0, 1, 2, 3].map((r) => h('div', { class: 'rotation' },
-        renderPiece(id, r, { srsBox: true, cellSize: 'var(--learn-cell)' })))),
-    h('p', { class: 'reveal hint' }, piece.hint),
+        renderPiece(id, r, { frame: true, showGrid: true, cellSize: 'var(--learn-cell)' })))),
+    h('p', { class: 'reveal hint' }, piece.description),
   );
 }
 

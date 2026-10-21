@@ -65,3 +65,9 @@ test('boardForPiece trims by default and keeps the SRS box when asked', () => {
   assert.deepEqual(boardToRows(boardForPiece('T', 0)), ['.T.', 'TTT']);
   assert.deepEqual(boardToRows(boardForPiece('I', 1, { srsBox: true })), ['..I.', '..I.', '..I.', '..I.']);
 });
+
+test('boardForPiece frame option draws a 4×4 spawn frame', () => {
+  assert.deepEqual(boardToRows(boardForPiece('O', 0, { frame: true })), ['.OO.', '.OO.', '....', '....']);
+  assert.deepEqual(boardToRows(boardForPiece('T', 0, { frame: true })), ['.T..', 'TTT.', '....', '....']);
+  assert.deepEqual(boardToRows(boardForPiece('I', 0, { frame: true })), ['....', 'IIII', '....', '....']);
+});

@@ -5,7 +5,7 @@
 //   'I'..'L'    → filled by that piece (rendered in its color)
 //   'G'         → filled, neutral gray (shape-only display, pre-filled terrain)
 
-import { getPiece, normalizedCells, rawCells } from './pieces.js';
+import { SPAWN_FRAME_SIZE, getPiece, framedCells, normalizedCells, rawCells } from './pieces.js';
 
 export const EMPTY = null;
 export const GRAY = 'G';
@@ -93,13 +93,23 @@ export function legalPlacements(board, pieceId) {
   return out;
 }
 
-// A board just big enough to show one piece. `srsBox` keeps the piece in its
-// SRS bounding box (so rotating looks like real in-game rotation); otherwise
-// the board is trimmed to the piece.
-export function boardForPiece(pieceId, rotation, { value = pieceId, srsBox = false } = {}) {
-  const cells = srsBox ? rawCells(pieceId, rotation) : normalizedCells(pieceId, rotation);
-  const w = srsBox ? getPiece(pieceId).boxSize : Math.max(...cells.map(([x]) => x)) + 1;
-  const h = srsBox ? getPiece(pieceId).boxSize : Math.max(...cells.map(([, y]) => y)) + 1;
+// A board just big enough to show one piece. Options:
+//   frame  – place it in the 4×4 spawn frame, aligned like in-game spawns
+//   srsBox – keep it in its own SRS bounding box
+// Otherwise the board is trimmed to the piece.
+export function boardForPiece(pieceId, rotation, { value = pieceId, srsBox = false, frame = false } = {}) {
+  let cells, w, h;
+  if (frame) {
+    cells = framedCells(pieceId, rotation);
+    w = h = SPAWN_FRAME_SIZE;
+  } else if (srsBox) {
+    cells = rawCells(pieceId, rotation);
+    w = h = getPiece(pieceId).boxSize;
+  } else {
+    cells = normalizedCells(pieceId, rotation);
+    w = Math.max(...cells.map(([x]) => x)) + 1;
+    h = Math.max(...cells.map(([, y]) => y)) + 1;
+  }
   const board = createBoard(w, h);
   for (const [x, y] of cells) board[y][x] = value;
   return board;
