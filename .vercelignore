@@ -1,0 +1,10 @@
+# Dev-only files: keep them in the repo but off the live site.
+# Vercel serves the repo root as-is (see vercel.json), so anything not listed
+# here is publicly downloadable from tetrain.vercel.app.
+.claude/
+tests/
+serve.js
+package.json
+README.md
+.gitignore
+.gitattributes

@@ -51,7 +51,7 @@ npm test
 
 The tests use Node's built-in test runner. They check that every piece has exactly 4 cells in all 4 rotations, that each rotation is the previous one turned clockwise, that the colors match the guideline, and that board placement and stats weighting work. `/test.html` shows every piece in every rotation for a visual check.
 
-**Deploys:** every push to `main` goes live at tetrain.vercel.app through Vercel. Other branches get preview links. `vercel.json` tells Vercel to serve the repo root as-is.
+**Deploys:** every push to `main` goes live at tetrain.vercel.app through Vercel. Other branches get preview links. `vercel.json` tells Vercel to serve the repo root as-is, minus the dev files listed in `.vercelignore`.
 
 ### Where the piece data lives
 
@@ -65,6 +65,7 @@ styles.css          dark theme, beveled block cells, mobile layout
 test.html           visual check: every piece × every rotation
 serve.js            zero-dependency dev server
 vercel.json         static hosting config
+.vercelignore       dev files kept off the live site
 src/
   pieces.js         piece data (colors, hints, SRS rotations)  ← source of truth
   board.js          board model: 2D array, canPlace, place, legalPlacements …
