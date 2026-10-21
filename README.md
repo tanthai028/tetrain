@@ -6,7 +6,7 @@ tetrain.gg helps you memorize the Tetris Guideline piece colors and shapes until
 
 ## Modes
 
-- **Learn:** all 7 pieces in every rotation at a glance. Hover or tap a piece for its memory hint. The two mirror pairs beginners mix up, J/L (blue/orange) and S/Z (green/red), sit side by side; tap them for how to tell them apart.
+- **Learn:** all 7 pieces in every rotation at a glance. Hover or tap a piece for a one-line description. The two mirror pairs beginners mix up, J/L (blue/orange) and S/Z (green/red), sit side by side; tap them for how to tell them apart.
 - **Quiz:** three kinds of question, always at a random rotation:
   - **Shape → Color:** a gray piece; pick its color.
   - **Color → Shape:** a color; pick the matching gray piece.
@@ -55,7 +55,7 @@ The tests use Node's built-in test runner. They check that every piece has exact
 
 ### Where the piece data lives
 
-**`src/pieces.js` is the single source of truth.** It holds each piece's color, hint, cell coordinates for all four SRS rotations (`0`, `R`, `2`, `L`) and the confusable pairs. Nothing else hardcodes a piece color, and every piece is drawn from this data as a grid of cells.
+**`src/pieces.js` is the single source of truth.** It holds each piece's color, description, cell coordinates for all four SRS rotations (`0`, `R`, `2`, `L`) and the confusable pairs. Nothing else hardcodes a piece color, and every piece is drawn from this data as a grid of cells.
 
 ### Project layout
 
