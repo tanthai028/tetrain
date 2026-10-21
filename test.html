@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Piece Rotation Check</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .vt { width: 100%; border-collapse: collapse; }
+    .vt th, .vt td { padding: 10px; border-bottom: 1px solid var(--line); text-align: center; }
+    .vt td .board { margin: 0 auto; }
+    .vt td.cell-ok { color: var(--ok); }
+    .vt td.cell-bad { color: var(--bad); font-weight: 700; }
+    #summary { font-weight: 700; }
+  </style>
+</head>
+<body>
+  <main>
+    <h2>Visual test: every piece × every SRS rotation</h2>
+    <p class="lede">Drawn from <code>src/pieces.js</code> with the same renderer the app uses. Each cell shows the SRS box with a grid; the last column checks 4 cells per rotation.</p>
+    <p id="summary"></p>
+    <div class="table-wrap"><table class="vt" id="vt"></table></div>
+  </main>
+  <script type="module">
+    import { PIECE_IDS, PIECES, ROTATION_NAMES } from './src/pieces.js';
+    import { renderPiece } from './src/render.js';
+    import { h } from './src/dom.js';
+
+    let failures = 0;
+    const table = document.getElementById('vt');
+    table.append(h('tr', {}, h('th', {}, 'Piece'), ...ROTATION_NAMES.map((r) => h('th', {}, `Rot ${r}`)), h('th', {}, 'Gray (quiz)'), h('th', {}, '4 cells each?')));
+    for (const id of PIECE_IDS) {
+      const counts = PIECES[id].rotations.map((c) => new Set(c.map(String)).size);
+      const ok = counts.length === 4 && counts.every((n) => n === 4);
+      if (!ok) failures++;
+      table.append(h('tr', {},
+        h('th', {}, `${id} · ${PIECES[id].colorName} · ${PIECES[id].hex}`),
+        ...ROTATION_NAMES.map((_, r) => h('td', {}, renderPiece(id, r, { srsBox: true, showGrid: true, cellSize: '18px' }))),
+        h('td', {}, renderPiece(id, 1, { gray: true, cellSize: '18px' })),
+        h('td', { class: ok ? 'cell-ok' : 'cell-bad' }, ok ? '✓ 4/4/4/4' : `✗ ${counts.join('/')}`),
+      ));
+    }
+    const summary = document.getElementById('summary');
+    summary.textContent = failures ? `✗ ${failures} piece(s) failed` : '✓ All 7 pieces have exactly 4 cells in all 4 rotations';
+    summary.style.color = failures ? 'var(--bad)' : 'var(--ok)';
+  </script>
+</body>
+</html>
