@@ -104,13 +104,20 @@ main { max-width: 1040px; margin: 0 auto; padding: 8px 16px 48px; }
   border: 1px solid var(--line); border-radius: 50%;
   color: var(--muted); font-size: 0.75rem; font-weight: 700;
 }
-.reveal { display: none; }
+/* Overlaid on the card (below its header) so revealing never shifts layout. */
+.reveal {
+  position: absolute; inset: var(--reveal-top, 52px) 8px 8px 8px; z-index: 1;
+  display: grid; place-items: center; padding: 10px 12px; margin: 0;
+  background: rgba(21, 25, 34, 0.97); border-radius: 10px;
+  text-align: center; overflow: auto;
+  visibility: hidden; opacity: 0; transition: opacity 120ms ease;
+}
 .reveal-card.is-open .reveal,
-.reveal-card:focus-visible .reveal { display: block; }
+.reveal-card:focus-visible .reveal { visibility: visible; opacity: 1; }
 .reveal-card.is-open::after,
 .reveal-card:focus-visible::after { visibility: hidden; }
 @media (hover: hover) {
-  .reveal-card:hover .reveal { display: block; }
+  .reveal-card:hover .reveal { visibility: visible; opacity: 1; }
   .reveal-card:hover::after { visibility: hidden; }
 }
 
@@ -136,7 +143,7 @@ main { max-width: 1040px; margin: 0 auto; padding: 8px 16px 48px; }
 .pairs { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
 .pair { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; }
 .pair-pieces { display: flex; align-items: center; justify-content: center; gap: 20px; }
-.pair .hint { margin-top: 12px; }
+.pair { --reveal-top: 8px; }
 .pair-side { display: grid; justify-items: center; gap: 8px; }
 .pair-label { font-size: 1.3rem; }
 .pair-vs { color: var(--muted); font-weight: 700; }
@@ -154,19 +161,28 @@ main { max-width: 1040px; margin: 0 auto; padding: 8px 16px 48px; }
 .stat__value { font-size: 1.35rem; font-weight: 700; font-variant-numeric: tabular-nums; }
 .stat__label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
 
-.speed-bar {
+/* Fixed width so the toolbar never moves when the timer replaces the label. */
+.speed-btn {
   --progress: 1;
-  position: relative; overflow: hidden;
-  padding: 8px 12px; margin-bottom: 12px; border-radius: 10px;
-  background: var(--panel); border: 1px solid var(--line);
-  font-weight: 600; font-variant-numeric: tabular-nums; text-align: center;
+  position: relative; isolation: isolate; overflow: hidden;
+  width: 12.5rem; font-variant-numeric: tabular-nums; white-space: nowrap;
 }
-.speed-bar::before {
+.speed-btn.is-running { background: var(--panel-2); color: var(--text); border-color: var(--line); }
+.speed-btn.is-running::before {
   content: ""; position: absolute; inset: 0; z-index: -1;
-  background: rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.14);
   transform-origin: left; transform: scaleX(var(--progress));
 }
-.speed-bar { isolation: isolate; }
+
+.quiz-play { position: relative; }
+.round-over {
+  position: absolute; inset: 0; z-index: 2;
+  display: grid; place-content: center; justify-items: center; gap: 8px;
+  background: rgba(11, 13, 18, 0.9); border-radius: var(--radius);
+}
+.round-over[hidden] { display: none; }
+.round-over__score { font-size: 4rem; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
+.round-over__sub { color: var(--muted); font-weight: 600; margin-bottom: 8px; }
 
 .q-card {
   background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
@@ -180,7 +196,8 @@ main { max-width: 1040px; margin: 0 auto; padding: 8px 16px 48px; }
 
 .options { display: grid; gap: 8px; margin-top: 12px; grid-template-columns: repeat(4, 1fr); }
 .option {
-  position: relative; min-height: 72px; padding: 10px 6px 8px;
+  /* Same fixed size for every question type so the grid never resizes. */
+  position: relative; height: 96px; padding: 10px 6px 8px;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
   background: var(--panel); border: 2px solid var(--line); border-radius: 12px; cursor: pointer;
   transition: transform 80ms ease, border-color 120ms ease;
@@ -198,7 +215,6 @@ main { max-width: 1040px; margin: 0 auto; padding: 8px 16px 48px; }
 @media (hover: none) { .opt-key { display: none; } }
 .opt-letter { font-size: 1.8rem; font-weight: 800; }
 .opt-piece { height: calc(var(--opt-cell) * 4.4); display: grid; place-items: center; }
-.options--color-shape .option { min-height: 96px; }
 
 @keyframes shake {
   25% { transform: translateX(-4px); }
@@ -224,6 +240,8 @@ main { max-width: 1040px; margin: 0 auto; padding: 8px 16px 48px; }
   .piece-card { padding: 10px; gap: 8px; }
   .piece-letter { font-size: 1.6rem; }
   .rotations { gap: 4px; }
+  .piece-card { --reveal-top: 44px; }
+  .reveal { font-size: 0.85rem; padding: 8px; }
   .brand { font-size: 1rem; }
   .tab { min-width: 0; padding: 8px 12px; }
   .scoreboard { gap: 6px; }
@@ -231,8 +249,8 @@ main { max-width: 1040px; margin: 0 auto; padding: 8px 16px 48px; }
   .stat__value { font-size: 1.05rem; }
   .stat__label { font-size: 0.6rem; letter-spacing: 0.03em; }
   .q-card { padding: 10px; }
-  .options { grid-template-columns: repeat(3, 1fr); }
-  .options--shape-name { grid-template-columns: repeat(4, 1fr); }
+  .options { grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .option { height: 84px; padding: 8px 4px 6px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

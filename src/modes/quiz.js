@@ -46,7 +46,9 @@ export function createQuizMode(app) {
   );
   typeSelect.addEventListener('change', () => { typeFilter = typeSelect.value; nextQuestion(); });
 
-  const speedBtn = h('button', { class: 'btn btn--accent', type: 'button' }, '⚡ 60s speed round');
+  // The speed-round timer lives inside this button so nothing shifts when a round starts.
+  const SPEED_LABEL = '⚡ 60s speed round';
+  const speedBtn = h('button', { class: 'btn btn--accent speed-btn', type: 'button' }, SPEED_LABEL);
   speedBtn.addEventListener('click', () => (speed.active ? endSpeedRound(true) : startSpeedRound()));
 
   const stat = (label) => {
@@ -59,18 +61,21 @@ export function createQuizMode(app) {
   const sBest = stat('Best streak');
   const scoreboard = h('div', { class: 'scoreboard' }, sStreak.el, sAcc.el, sTime.el, sBest.el);
 
-  const speedBar = h('div', { class: 'speed-bar', hidden: true });
   const promptText = h('p', { class: 'q-prompt' });
   const stage = h('div', { class: 'q-stage' });
   const feedback = h('div', { class: 'feedback', 'aria-live': 'polite' });
   const options = h('div', { class: 'options' });
+  // Speed-round result, overlaid on the question area.
+  const roundOver = h('div', { class: 'round-over', hidden: true });
 
   const el = h('section', { class: 'mode mode-quiz' },
     h('div', { class: 'quiz-toolbar' }, typeSelect, speedBtn),
     scoreboard,
-    speedBar,
-    h('div', { class: 'q-card' }, promptText, stage, feedback),
-    options,
+    h('div', { class: 'quiz-play' },
+      h('div', { class: 'q-card' }, promptText, stage, feedback),
+      options,
+      roundOver,
+    ),
   );
 
   // ---- Question flow ---------------------------------------------------
@@ -123,6 +128,7 @@ export function createQuizMode(app) {
     clearTimeout(advanceTimer);
     locked = false;
     pendingResume = null;
+    roundOver.hidden = true;
     question = buildQuestion();
     promptText.textContent = QUESTION_TYPES[question.type].prompt;
     feedback.textContent = '';
@@ -194,8 +200,8 @@ export function createQuizMode(app) {
     speed.active = true;
     speed.score = 0;
     speed.endsAt = performance.now() + SPEED_ROUND_MS;
-    speedBtn.textContent = 'Stop speed round';
-    speedBar.hidden = false;
+    speedBtn.classList.add('is-running');
+    speedBtn.title = 'Stop speed round';
     tickSpeed();
     speed.timer = setInterval(tickSpeed, 100);
     nextQuestion();
@@ -203,19 +209,18 @@ export function createQuizMode(app) {
 
   function tickSpeed() {
     const left = Math.max(0, speed.endsAt - performance.now());
-    speedBar.style.setProperty('--progress', String(left / SPEED_ROUND_MS));
-    speedBar.textContent = `⏱ ${(left / 1000).toFixed(1)}s · ${speed.score} correct · best ${app.stats.bestSpeedRound}`;
+    speedBtn.style.setProperty('--progress', String(left / SPEED_ROUND_MS));
+    speedBtn.textContent = `⏱ ${(left / 1000).toFixed(1)}s · ${speed.score} ✓`;
     if (left <= 0) endSpeedRound(false);
   }
 
   function endSpeedRound(cancelled) {
     clearInterval(speed.timer);
     speed.active = false;
-    speedBtn.textContent = '⚡ 60s speed round';
-    if (cancelled) {
-      speedBar.hidden = true;
-      return;
-    }
+    speedBtn.classList.remove('is-running');
+    speedBtn.removeAttribute('title');
+    speedBtn.textContent = SPEED_LABEL;
+    if (cancelled) return;
     const isBest = speed.score > app.stats.bestSpeedRound;
     if (isBest) {
       app.stats.bestSpeedRound = speed.score;
@@ -223,10 +228,13 @@ export function createQuizMode(app) {
     }
     clearTimeout(advanceTimer);
     locked = true;
-    speedBar.textContent = `Time! ${speed.score} correct in 60s${isBest ? ' · 🏆 new best!' : ` · best ${app.stats.bestSpeedRound}`}`;
-    const resume = () => { speedBar.hidden = true; nextQuestion(); };
-    options.replaceChildren(h('button', { class: 'btn btn--accent', type: 'button', onclick: resume }, 'Continue'));
-    pendingResume = resume;
+    roundOver.replaceChildren(
+      h('div', { class: 'round-over__score' }, String(speed.score)),
+      h('div', { class: 'round-over__sub' }, isBest ? '🏆 new best' : `best ${app.stats.bestSpeedRound}`),
+      h('button', { class: 'btn btn--accent', type: 'button', onclick: nextQuestion }, 'Continue'),
+    );
+    roundOver.hidden = false;
+    pendingResume = nextQuestion;
   }
 
   // ---- Keyboard --------------------------------------------------------
