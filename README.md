@@ -14,7 +14,7 @@ tetrain.gg helps you memorize the Tetris Guideline piece colors and shapes until
 
   Answers in a row build a combo, with a popup and a rising sound like line-clear combos in tetr.io, plus a block burst every 5. A wrong answer flashes the right one in color. Pieces you miss come up more often until you improve, especially J/L and S/Z mix-ups.
 
-  For a **timed run**, pick **30s** or **60s** and press **▶ Start timed run**. It ends with your score, accuracy, average answer time and best streak, and each length keeps its own best.
+  For a **timed run**, pick **15s** or **30s** and press **▶ Start timed run**. It ends with your score, accuracy, average answer time and best streak, and each length keeps its own best.
 - **Stats:** for each piece, your attempts, accuracy and average time.
 
 **Keyboard:** answer with **1–7**, or press the piece's letter (**I O T S Z J L**). **M** toggles sound.

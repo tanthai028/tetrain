@@ -2,7 +2,7 @@
 
 import { PIECE_IDS, PIECES } from '../pieces.js';
 import { renderPiece } from '../render.js';
-import { accuracy, averageMs, totals, resetStats } from '../stats.js';
+import { RUN_LENGTHS, accuracy, averageMs, totals, resetStats } from '../stats.js';
 import { h, formatMs, formatPct } from '../dom.js';
 
 export function createStatsMode(app) {
@@ -40,7 +40,7 @@ export function createStatsMode(app) {
         h('div', { class: 'stat' }, h('span', { class: 'stat__value' }, String(all.attempts)), h('span', { class: 'stat__label' }, 'Answers')),
         h('div', { class: 'stat' }, h('span', { class: 'stat__value' }, formatPct(all.attempts ? all.correct / all.attempts : null)), h('span', { class: 'stat__label' }, 'Accuracy')),
         h('div', { class: 'stat' }, h('span', { class: 'stat__value' }, formatMs(all.attempts ? all.totalMs / all.attempts : null)), h('span', { class: 'stat__label' }, 'Avg time')),
-        [30, 60].map((sec) => h('div', { class: 'stat' },
+        RUN_LENGTHS.map((sec) => h('div', { class: 'stat' },
           h('span', { class: 'stat__value' }, String(stats.bestRuns[sec] ?? 0)),
           h('span', { class: 'stat__label' }, `Best ${sec}s run`))),
       ),

@@ -1,10 +1,10 @@
 // Quiz mode: three question types, random rotations, weighted piece selection,
 // combo popups + sound on streaks, keyboard answers (1–7 or the piece letter)
-// and optional 30- or 60-second timed runs whose results show accuracy and speed.
+// and optional 15- or 30-second timed runs whose results show accuracy and speed.
 
 import { PIECE_IDS, PIECES } from '../pieces.js';
 import { renderPiece, renderSwatch } from '../render.js';
-import { recordAnswer, saveStats, pickWeighted } from '../stats.js';
+import { RUN_LENGTHS, recordAnswer, saveStats, pickWeighted } from '../stats.js';
 import { playCorrect, playMilestone, playWrong, playStart, playEnd } from '../sfx.js';
 import { h, formatMs, formatPct } from '../dom.js';
 
@@ -17,7 +17,6 @@ const TYPE_ORDER = Object.keys(QUESTION_TYPES);
 
 const CORRECT_PAUSE_MS = 350;
 const WRONG_FLASH_MS = 1000;
-const RUN_LENGTHS = [30, 60]; // seconds
 const RUN_LENGTH_KEY = 'tetrain:run-length';
 const MILESTONE_EVERY = 5;
 const BURST_BLOCKS = 12;
@@ -45,9 +44,9 @@ const emptyRun = () => ({ attempts: 0, correct: 0, totalMs: 0, bestStreak: 0 });
 function loadRunLength() {
   try {
     const sec = Number(localStorage.getItem(RUN_LENGTH_KEY));
-    return RUN_LENGTHS.includes(sec) ? sec : 60;
+    return RUN_LENGTHS.includes(sec) ? sec : RUN_LENGTHS.at(-1);
   } catch {
-    return 60;
+    return RUN_LENGTHS.at(-1);
   }
 }
 

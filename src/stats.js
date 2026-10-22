@@ -10,6 +10,9 @@ import { PIECE_IDS, confusablePartner } from './pieces.js';
 const STORAGE_KEY = 'tetrain:stats:v1';
 const RECENT_WINDOW = 10;
 
+// Timed-run lengths in seconds; each keeps its own best in stats.bestRuns.
+export const RUN_LENGTHS = [15, 30];
+
 function emptyPieceStats() {
   return { attempts: 0, correct: 0, totalMs: 0, wrong: {}, recent: [] };
 }
@@ -17,7 +20,7 @@ function emptyPieceStats() {
 export function emptyStats() {
   const pieces = {};
   for (const id of PIECE_IDS) pieces[id] = emptyPieceStats();
-  // bestRuns: best correct answers per timed-run length in seconds, e.g. { 30: 12, 60: 25 }.
+  // bestRuns: best correct answers per timed-run length in seconds, e.g. { 15: 8, 30: 14 }.
   return { pieces, bestStreak: 0, bestRuns: {} };
 }
 
