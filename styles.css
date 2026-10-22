@@ -18,8 +18,9 @@
 
   --learn-cell: 16px;
   --prompt-cell: 40px;
-  --swatch-size: 120px;
-  --opt-cell: 15px;
+  /* Color → Shape: the color block is about one answer shape wide, so the two read as the same scale. */
+  --swatch-size: 80px;
+  --opt-cell: 18px;
   --opt-swatch: 40px;
 
   color-scheme: dark;
@@ -276,7 +277,7 @@ main { max-width: 1040px; margin: 0 auto; padding: 16px 16px 48px; }
 .options { display: grid; gap: 8px; margin-top: 12px; grid-template-columns: repeat(4, 1fr); }
 .option {
   /* Same fixed size for every question type so the grid never resizes. */
-  position: relative; height: 96px; padding: 10px 6px 8px;
+  position: relative; height: 100px; padding: 10px 6px 8px;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
   background: var(--panel); border: 1px solid var(--line); border-radius: 14px; cursor: pointer;
   transition: transform 80ms ease, border-color 120ms ease;
@@ -326,7 +327,7 @@ main { max-width: 1040px; margin: 0 auto; padding: 16px 16px 48px; }
 }
 
 @media (max-width: 560px) {
-  :root { --prompt-cell: 28px; --swatch-size: 84px; --opt-cell: 13px; --opt-swatch: 34px; --learn-cell: 11px; }
+  :root { --prompt-cell: 28px; --swatch-size: 56px; --opt-cell: 15px; --opt-swatch: 34px; --learn-cell: 11px; }
   .piece-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
   .piece-card { padding: 10px; gap: 8px; }
   .piece-letter { font-size: 1.6rem; }
