@@ -1,9 +1,11 @@
 // Quiz mode: three question types, random rotations, weighted piece selection,
-// instant feedback, keyboard answers (1–7) and an optional 60-second speed round.
+// combo popups + sound on streaks, keyboard answers (1–7 or the piece letter)
+// and an optional 60-second speed round whose results show accuracy and speed.
 
 import { PIECE_IDS, PIECES } from '../pieces.js';
 import { renderPiece, renderSwatch } from '../render.js';
 import { recordAnswer, saveStats, pickWeighted } from '../stats.js';
+import { playCorrect, playMilestone, playWrong, playStart, playEnd } from '../sfx.js';
 import { h, formatMs, formatPct } from '../dom.js';
 
 export const QUESTION_TYPES = {
@@ -16,6 +18,8 @@ const TYPE_ORDER = Object.keys(QUESTION_TYPES);
 const CORRECT_PAUSE_MS = 350;
 const WRONG_FLASH_MS = 1000;
 const SPEED_ROUND_MS = 60_000;
+const MILESTONE_EVERY = 5;
+const BURST_BLOCKS = 12;
 
 const randomRotation = () => Math.floor(Math.random() * 4);
 
@@ -28,6 +32,15 @@ function shuffle(list) {
   return a;
 }
 
+// Restart a CSS animation class on an element.
+function replay(el, className) {
+  el.classList.remove(className);
+  void el.offsetWidth;
+  el.classList.add(className);
+}
+
+const emptyRun = () => ({ attempts: 0, correct: 0, totalMs: 0, bestStreak: 0 });
+
 export function createQuizMode(app) {
   let typeFilter = 'mixed';
   let mixedIndex = 0;
@@ -35,47 +48,44 @@ export function createQuizMode(app) {
   let shownAt = 0;
   let locked = false;
   let advanceTimer = null;
-  let pendingResume = null; // set while the "speed round over" screen is up
-  const session = { streak: 0, attempts: 0, correct: 0, totalMs: 0 };
-  const speed = { active: false, endsAt: 0, score: 0, timer: null };
+  let pendingResume = null; // set while the speed-round results are up
+  let streak = 0;
+  const speed = { active: false, endsAt: 0, timer: null, run: emptyRun() };
 
   // ---- DOM -------------------------------------------------------------
-  const typeSelect = h('select', { class: 'select', 'aria-label': 'Question type' },
-    h('option', { value: 'mixed' }, 'Mixed (rotate all 3)'),
-    ...TYPE_ORDER.map((t) => h('option', { value: t }, QUESTION_TYPES[t].label)),
-  );
-  typeSelect.addEventListener('change', () => { typeFilter = typeSelect.value; nextQuestion(); });
+  // Segmented control: one click to switch question type.
+  const typeSeg = h('div', { class: 'segmented', role: 'radiogroup', 'aria-label': 'Question type' },
+    [['mixed', 'Mixed'], ...TYPE_ORDER.map((t) => [t, QUESTION_TYPES[t].label])].map(([value, label]) => {
+      const btn = h('button', { type: 'button', role: 'radio', 'data-value': value }, label);
+      btn.addEventListener('click', () => { typeFilter = value; drawTypeSeg(); nextQuestion(); });
+      return btn;
+    }));
+  function drawTypeSeg() {
+    for (const btn of typeSeg.children) {
+      const on = btn.dataset.value === typeFilter;
+      btn.classList.toggle('is-active', on);
+      btn.setAttribute('aria-checked', String(on));
+    }
+  }
+  drawTypeSeg();
 
   // The speed-round timer lives inside this button so nothing shifts when a round starts.
   const SPEED_LABEL = '⚡ 60s speed round';
   const speedBtn = h('button', { class: 'btn btn--accent speed-btn', type: 'button' }, SPEED_LABEL);
   speedBtn.addEventListener('click', () => (speed.active ? endSpeedRound(true) : startSpeedRound()));
 
-  const stat = (label) => {
-    const value = h('span', { class: 'stat__value' }, '–');
-    return { value, el: h('div', { class: 'stat' }, value, h('span', { class: 'stat__label' }, label)) };
-  };
-  const sStreak = stat('Streak');
-  const sAcc = stat('Accuracy');
-  const sTime = stat('Avg time');
-  const sBest = stat('Best streak');
-  const scoreboard = h('div', { class: 'scoreboard' }, sStreak.el, sAcc.el, sTime.el, sBest.el);
-
   const promptText = h('p', { class: 'q-prompt' });
   const stage = h('div', { class: 'q-stage' });
-  const feedback = h('div', { class: 'feedback', 'aria-live': 'polite' });
+  const card = h('div', { class: 'q-card' }, promptText, stage);
   const options = h('div', { class: 'options' });
-  // Speed-round result, overlaid on the question area.
-  const roundOver = h('div', { class: 'round-over', hidden: true });
+  // Popups and bursts are drawn on this layer, on top of everything.
+  const fx = h('div', { class: 'fx-layer', 'aria-hidden': 'true' });
+  // Speed-round results, overlaid on the question area.
+  const results = h('div', { class: 'results', hidden: true });
 
   const el = h('section', { class: 'mode mode-quiz' },
-    h('div', { class: 'quiz-toolbar' }, typeSelect, speedBtn),
-    scoreboard,
-    h('div', { class: 'quiz-play' },
-      h('div', { class: 'q-card' }, promptText, stage, feedback),
-      options,
-      roundOver,
-    ),
+    h('div', { class: 'quiz-toolbar' }, typeSeg, speedBtn),
+    h('div', { class: 'quiz-play' }, card, options, fx, results),
   );
 
   // ---- Question flow ---------------------------------------------------
@@ -109,12 +119,12 @@ export function createQuizMode(app) {
     }
   }
 
-  function renderOption({ id, rotation }, index, colored = false) {
+  function renderOption({ id, rotation }, index) {
     let content;
     if (question.type === 'shape-color') {
       content = [renderSwatch(id, { cellSize: 'var(--opt-swatch)' }), h('span', { class: 'opt-label' }, PIECES[id].colorName)];
     } else if (question.type === 'color-shape') {
-      content = [h('div', { class: 'opt-piece' }, renderPiece(id, rotation, { gray: !colored, cellSize: 'var(--opt-cell)' }))];
+      content = [h('div', { class: 'opt-piece' }, renderPiece(id, rotation, { gray: true, cellSize: 'var(--opt-cell)' }))];
     } else {
       content = [h('span', { class: 'opt-letter' }, id)];
     }
@@ -128,11 +138,9 @@ export function createQuizMode(app) {
     clearTimeout(advanceTimer);
     locked = false;
     pendingResume = null;
-    roundOver.hidden = true;
+    results.hidden = true;
     question = buildQuestion();
     promptText.textContent = QUESTION_TYPES[question.type].prompt;
-    feedback.textContent = '';
-    feedback.className = 'feedback';
     renderPrompt(false);
     options.className = `options options--${question.type}`;
     options.replaceChildren(...question.options.map((o, i) => renderOption(o, i)));
@@ -144,36 +152,37 @@ export function createQuizMode(app) {
     if (speed.active && performance.now() >= speed.endsAt) return;
     locked = true;
     const ms = performance.now() - shownAt;
-    const { target } = question;
-    const correct = answeredId === target;
+    const correct = answeredId === question.target;
 
-    recordAnswer(app.stats, target, answeredId, ms);
-    session.attempts += 1;
-    session.totalMs += ms;
-    if (correct) {
-      session.correct += 1;
-      session.streak += 1;
-      if (speed.active) speed.score += 1;
-      app.stats.bestStreak = Math.max(app.stats.bestStreak, session.streak);
-    } else {
-      session.streak = 0;
+    recordAnswer(app.stats, question.target, answeredId, ms);
+    streak = correct ? streak + 1 : 0;
+    if (speed.active) {
+      const { run } = speed;
+      run.attempts += 1;
+      run.totalMs += ms;
+      if (correct) run.correct += 1;
+      run.bestStreak = Math.max(run.bestStreak, streak);
     }
     saveStats(app.stats);
-    updateScoreboard();
-    showFeedback(answeredId, correct, ms);
 
+    revealAnswer(answeredId);
+    if (correct) celebrate();
+    else {
+      playWrong();
+      replay(card, 'is-shaking');
+    }
     advanceTimer = setTimeout(nextQuestion, correct ? CORRECT_PAUSE_MS : WRONG_FLASH_MS);
   }
 
-  function showFeedback(answeredId, correct, ms) {
+  // Show the correct answer in color and mark the picked one.
+  function revealAnswer(answeredId) {
     const { target, type } = question;
-    // Reveal the correct answer in color.
     renderPrompt(true);
+    replay(stage, 'is-popping');
     question.options.forEach((opt, i) => {
       const btn = options.children[i];
       if (opt.id === target) {
         if (type === 'color-shape') {
-          // Color the correct shape so you see which piece wore that color.
           btn.querySelector('.opt-piece').replaceChildren(
             renderPiece(opt.id, opt.rotation, { cellSize: 'var(--opt-cell)' }));
         }
@@ -182,26 +191,57 @@ export function createQuizMode(app) {
         btn.classList.add('is-wrong');
       }
     });
-
-    // The colored prompt and highlighted option already show the answer.
-    feedback.className = `feedback ${correct ? 'feedback--ok' : 'feedback--bad'}`;
-    feedback.textContent = correct ? `✓ ${formatMs(ms)}` : '✗';
   }
 
-  function updateScoreboard() {
-    sStreak.value.textContent = String(session.streak);
-    sAcc.value.textContent = formatPct(session.attempts ? session.correct / session.attempts : null);
-    sTime.value.textContent = formatMs(session.attempts ? session.totalMs / session.attempts : null);
-    sBest.value.textContent = String(app.stats.bestStreak);
+  // ---- Effects ---------------------------------------------------------
+  function celebrate() {
+    const milestone = streak % MILESTONE_EVERY === 0;
+    playCorrect(streak);
+    if (milestone) playMilestone(streak);
+    if (streak >= 2) showCombo(milestone);
+    if (milestone) burst();
+  }
+
+  // tetr.io-style "N COMBO" popup in the answered piece's color.
+  function showCombo(milestone) {
+    fx.querySelector('.combo')?.remove();
+    const size = Math.min(1 + (streak - 2) * 0.06, 1.8);
+    const popup = h('div', {
+      class: `combo${milestone ? ' combo--big' : ''}`,
+      style: `--accent: ${PIECES[question.target].hex}; --size: ${size}`,
+    }, h('span', { class: 'combo__n' }, String(streak)), h('span', { class: 'combo__label' }, 'COMBO'));
+    popup.addEventListener('animationend', () => popup.remove());
+    fx.appendChild(popup);
+  }
+
+  // Blocks in the piece's color fly out from the prompt.
+  function burst() {
+    const box = stage.getBoundingClientRect();
+    const host = fx.getBoundingClientRect();
+    const cx = box.left + box.width / 2 - host.left;
+    const cy = box.top + box.height / 2 - host.top;
+    for (let i = 0; i < BURST_BLOCKS; i++) {
+      const angle = (i / BURST_BLOCKS) * Math.PI * 2 + Math.random() * 0.4;
+      const dist = 90 + Math.random() * 90;
+      const block = h('div', {
+        class: 'burst-block cell cell--filled',
+        style: `--c: ${PIECES[question.target].hex}; left: ${cx}px; top: ${cy}px;`
+          + ` --dx: ${Math.cos(angle) * dist}px; --dy: ${Math.sin(angle) * dist}px; --spin: ${Math.round(Math.random() * 360 - 180)}deg`,
+      });
+      block.addEventListener('animationend', () => block.remove());
+      fx.appendChild(block);
+    }
   }
 
   // ---- Speed round -----------------------------------------------------
   function startSpeedRound() {
     speed.active = true;
-    speed.score = 0;
+    speed.run = emptyRun();
     speed.endsAt = performance.now() + SPEED_ROUND_MS;
+    streak = 0;
     speedBtn.classList.add('is-running');
     speedBtn.title = 'Stop speed round';
+    playStart();
     tickSpeed();
     speed.timer = setInterval(tickSpeed, 100);
     nextQuestion();
@@ -210,7 +250,7 @@ export function createQuizMode(app) {
   function tickSpeed() {
     const left = Math.max(0, speed.endsAt - performance.now());
     speedBtn.style.setProperty('--progress', String(left / SPEED_ROUND_MS));
-    speedBtn.textContent = `⏱ ${(left / 1000).toFixed(1)}s · ${speed.score} ✓`;
+    speedBtn.textContent = `⏱ ${(left / 1000).toFixed(1)}s · ${speed.run.correct} ✓`;
     if (left <= 0) endSpeedRound(false);
   }
 
@@ -221,40 +261,52 @@ export function createQuizMode(app) {
     speedBtn.removeAttribute('title');
     speedBtn.textContent = SPEED_LABEL;
     if (cancelled) return;
-    const isBest = speed.score > app.stats.bestSpeedRound;
-    if (isBest) {
-      app.stats.bestSpeedRound = speed.score;
-      saveStats(app.stats);
-    }
+
+    const { run } = speed;
+    const isBest = run.correct > app.stats.bestSpeedRound;
+    app.stats.bestSpeedRound = Math.max(app.stats.bestSpeedRound, run.correct);
+    app.stats.bestStreak = Math.max(app.stats.bestStreak, run.bestStreak);
+    saveStats(app.stats);
     clearTimeout(advanceTimer);
     locked = true;
-    roundOver.replaceChildren(
-      h('div', { class: 'round-over__score' }, String(speed.score)),
-      h('div', { class: 'round-over__sub' }, isBest ? '🏆 new best' : `best ${app.stats.bestSpeedRound}`),
+    playEnd(isBest);
+
+    const tile = (value, label) => h('div', { class: 'stat' },
+      h('span', { class: 'stat__value' }, value), h('span', { class: 'stat__label' }, label));
+    results.replaceChildren(
+      h('div', { class: 'results__score' }, String(run.correct)),
+      h('div', { class: 'results__sub' }, isBest ? '🏆 new best' : `best ${app.stats.bestSpeedRound}`),
+      h('div', { class: 'results__stats' },
+        tile(formatPct(run.attempts ? run.correct / run.attempts : null), 'Accuracy'),
+        tile(formatMs(run.attempts ? run.totalMs / run.attempts : null), 'Avg time'),
+        tile(String(run.bestStreak), 'Best streak'),
+      ),
       h('button', { class: 'btn btn--accent', type: 'button', onclick: nextQuestion }, 'Continue'),
     );
-    roundOver.hidden = false;
+    results.hidden = false;
     pendingResume = nextQuestion;
   }
 
   // ---- Keyboard --------------------------------------------------------
+  // 1–7 picks by position; I O T S Z J L picks that piece directly.
   function onKey(e) {
     // Ignore auto-repeat so holding a key can't answer several questions.
     if (e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
-    if (e.target instanceof HTMLSelectElement) return;
-    const n = Number(e.key);
-    if (!Number.isInteger(n) || n < 1 || n > 7) return;
+    const key = e.key.toUpperCase();
+    const n = Number(key);
+    let id = null;
+    if (Number.isInteger(n) && n >= 1 && n <= 7) id = question?.options[n - 1]?.id;
+    else if (PIECE_IDS.includes(key)) id = key;
+    else return;
     e.preventDefault();
     if (pendingResume) { pendingResume(); return; }
-    const opt = question?.options[n - 1];
-    if (opt) answer(opt.id);
+    if (id) answer(id);
   }
 
   return {
     el,
     onShow() {
       document.addEventListener('keydown', onKey);
-      updateScoreboard();
       if (!question || !locked) nextQuestion();
     },
     onHide() {

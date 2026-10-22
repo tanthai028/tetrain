@@ -6,30 +6,32 @@ tetrain.gg helps you memorize the Tetris Guideline piece colors and shapes until
 
 ## Modes
 
-- **Learn:** all 7 pieces in every rotation at a glance. Hover or tap a piece for a one-line description. The two mirror pairs beginners mix up, J/L (blue/orange) and S/Z (green/red), sit side by side; tap them for how to tell them apart.
+- **Learn:** all 7 pieces in every rotation, each in a 4×4 grid that matches how pieces spawn in the game. Hover a piece (or press and hold on a phone) for its mnemonic and a one-line description.
 - **Quiz:** three kinds of question, always at a random rotation:
   - **Shape → Color:** a gray piece; pick its color.
   - **Color → Shape:** a color; pick the matching gray piece.
   - **Shape → Name:** a gray piece; pick its letter.
 
-  A wrong answer flashes the right one in color. Pieces you miss come up more often until you improve, especially J/L and S/Z mix-ups. The quiz shows your streak, accuracy and average answer time. Try the **60-second speed round** to see how many you can get right.
-- **Stats:** for each piece, your attempts, accuracy, average time and most common mistake (e.g. `J → you answered L 6×`).
+  Answers in a row build a combo, with a popup and a rising sound like line-clear combos in tetr.io, plus a block burst every 5. A wrong answer flashes the right one in color. Pieces you miss come up more often until you improve, especially J/L and S/Z mix-ups.
 
-**Keyboard:** press **1–7** to answer.
+  The **60-second speed round** ends with your score, accuracy, average answer time and best streak.
+- **Stats:** for each piece, your attempts, accuracy and average time.
+
+**Keyboard:** answer with **1–7**, or press the piece's letter (**I O T S Z J L**). **M** toggles sound.
 
 Your stats are saved in your own browser only. Clearing site data or switching browsers or devices starts you fresh. **Reset stats** on the Stats page clears them on purpose. The app reopens on the tab you used last.
 
 ## The pieces
 
-| Piece | Color  | Hex       | Shape                         |
-|-------|--------|-----------|-------------------------------|
-| I     | Cyan   | `#00F0F0` | 4 in a row                    |
-| O     | Yellow | `#F0F000` | 2×2 square                    |
-| T     | Purple | `#A000F0` | 3 in a row + center bump      |
-| S     | Green  | `#00F000` | Zigzag rising to the right    |
-| Z     | Red    | `#F00000` | Zigzag rising to the left     |
-| J     | Blue   | `#0000F0` | Stood upright, hooks left     |
-| L     | Orange | `#F0A000` | Stood upright, foot points right |
+| Piece | Color  | Mnemonic | Hex       | Shape                          |
+|-------|--------|----------|-----------|--------------------------------|
+| I     | Cyan   | icicle   | `#00F0F0` | 4 in a row                     |
+| O     | Yellow | omelet   | `#F0F000` | 2×2 square                     |
+| T     | Purple | testicle | `#A000F0` | 3 in a row, bump in the middle |
+| S     | Green  | spinach  | `#00F000` | Zigzag, rises to the right     |
+| Z     | Red    | zit      | `#F00000` | Zigzag, rises to the left      |
+| J     | Blue   | jeans    | `#0000F0` | 3 in a row, corner on the left |
+| L     | Orange | lava     | `#F0A000` | 3 in a row, corner on the right |
 
 Rotations follow SRS, the standard rotation system in modern Tetris.
 
@@ -55,7 +57,7 @@ The tests use Node's built-in test runner. They check that every piece has exact
 
 ### Where the piece data lives
 
-**`src/pieces.js` is the single source of truth.** It holds each piece's color, description, cell coordinates for all four SRS rotations (`0`, `R`, `2`, `L`) and the confusable pairs. Nothing else hardcodes a piece color, and every piece is drawn from this data as a grid of cells.
+**`src/pieces.js` is the single source of truth.** It holds each piece's color, mnemonic, description, cell coordinates for all four SRS rotations (`0`, `R`, `2`, `L`) and the confusable pairs. Nothing else hardcodes a piece color, and every piece is drawn from this data as a grid of cells.
 
 ### Project layout
 
@@ -71,6 +73,7 @@ src/
   board.js          board model: 2D array, canPlace, place, legalPlacements …
   render.js         renderBoard / renderPiece / renderSwatch (DOM grid)
   stats.js          localStorage stats + weighted piece selection
+  sfx.js            synthesized sound effects (Web Audio) + mute setting
   dom.js            tiny element helper + formatters
   main.js           tab navigation; registers modes
   modes/            learn.js, quiz.js, stats.js

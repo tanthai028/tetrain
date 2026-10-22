@@ -1,4 +1,4 @@
-// Single source of truth for tetromino colors, names, descriptions and shapes.
+// Single source of truth for tetromino colors, names, mnemonics, descriptions and shapes.
 // Every other module imports from here — no piece colors live anywhere else.
 //
 // Coordinates are [x, y] inside each piece's SRS bounding box (x → right,
@@ -26,6 +26,7 @@ export const PIECES = {
     boxSize: 4,
     frameOffset: [0, 0],
     description: '4 in a row',
+    mnemonic: 'icicle',
     rotations: [
       [[0, 1], [1, 1], [2, 1], [3, 1]],
       [[2, 0], [2, 1], [2, 2], [2, 3]],
@@ -40,6 +41,7 @@ export const PIECES = {
     boxSize: 2,
     frameOffset: [1, 0],
     description: '2×2 square',
+    mnemonic: 'omelet',
     rotations: [
       [[0, 0], [1, 0], [0, 1], [1, 1]],
       [[0, 0], [1, 0], [0, 1], [1, 1]],
@@ -54,6 +56,7 @@ export const PIECES = {
     boxSize: 3,
     frameOffset: [0, 0],
     description: '3 in a row, bump in the middle',
+    mnemonic: 'testicle',
     rotations: [
       [[1, 0], [0, 1], [1, 1], [2, 1]],
       [[1, 0], [1, 1], [2, 1], [1, 2]],
@@ -68,6 +71,7 @@ export const PIECES = {
     boxSize: 3,
     frameOffset: [0, 0],
     description: 'Zigzag, rises to the right',
+    mnemonic: 'spinach',
     rotations: [
       [[1, 0], [2, 0], [0, 1], [1, 1]],
       [[1, 0], [1, 1], [2, 1], [2, 2]],
@@ -82,6 +86,7 @@ export const PIECES = {
     boxSize: 3,
     frameOffset: [0, 0],
     description: 'Zigzag, rises to the left',
+    mnemonic: 'zit',
     rotations: [
       [[0, 0], [1, 0], [1, 1], [2, 1]],
       [[2, 0], [1, 1], [2, 1], [1, 2]],
@@ -96,6 +101,7 @@ export const PIECES = {
     boxSize: 3,
     frameOffset: [0, 0],
     description: '3 in a row, corner on the left',
+    mnemonic: 'jeans',
     rotations: [
       [[0, 0], [0, 1], [1, 1], [2, 1]],
       [[1, 0], [2, 0], [1, 1], [1, 2]],
@@ -110,6 +116,7 @@ export const PIECES = {
     boxSize: 3,
     frameOffset: [0, 0],
     description: '3 in a row, corner on the right',
+    mnemonic: 'lava',
     rotations: [
       [[2, 0], [0, 1], [1, 1], [2, 1]],
       [[1, 0], [1, 1], [1, 2], [2, 2]],

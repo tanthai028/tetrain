@@ -1,9 +1,8 @@
-// Stats mode: per-piece table of attempts, accuracy, average time and the most
-// common wrong answer.
+// Stats mode: per-piece table of attempts, accuracy and average time.
 
 import { PIECE_IDS, PIECES } from '../pieces.js';
 import { renderPiece } from '../render.js';
-import { accuracy, averageMs, mostCommonWrong, totals, resetStats } from '../stats.js';
+import { accuracy, averageMs, totals, resetStats } from '../stats.js';
 import { h, formatMs, formatPct } from '../dom.js';
 
 export function createStatsMode(app) {
@@ -16,16 +15,16 @@ export function createStatsMode(app) {
 
     const rows = PIECE_IDS.map((id) => {
       const s = stats.pieces[id];
-      const miss = mostCommonWrong(s);
       const acc = accuracy(s);
       return h('tr', {},
         h('td', { class: 'cell-piece' },
           renderPiece(id, 0, { cellSize: '10px' }),
           h('span', {}, h('strong', {}, id), ` ${PIECES[id].colorName}`)),
         h('td', { class: 'num' }, String(s.attempts)),
-        h('td', { class: `num ${acc != null && acc < 0.7 ? 'is-weak' : ''}` }, formatPct(acc)),
+        h('td', { class: 'acc-cell' },
+          h('div', { class: 'bar' }, h('span', { style: `width: ${Math.round((acc ?? 0) * 100)}%` })),
+          h('span', { class: `num ${acc != null && acc < 0.7 ? 'is-weak' : ''}` }, formatPct(acc))),
         h('td', { class: 'num' }, formatMs(averageMs(s))),
-        h('td', {}, miss ? `${id} → you answered ${miss.id} ${miss.count}×` : '–'),
       );
     });
 
@@ -46,8 +45,8 @@ export function createStatsMode(app) {
       h('div', { class: 'table-wrap' },
         h('table', { class: 'stats-table' },
           h('thead', {}, h('tr', {},
-            h('th', {}, 'Piece'), h('th', { class: 'num' }, 'Attempts'), h('th', { class: 'num' }, 'Accuracy'),
-            h('th', { class: 'num' }, 'Avg time'), h('th', {}, 'Most common mistake'))),
+            h('th', {}, 'Piece'), h('th', { class: 'num' }, 'Attempts'), h('th', {}, 'Accuracy'),
+            h('th', { class: 'num' }, 'Avg time'))),
           h('tbody', {}, ...rows),
         ),
       ),

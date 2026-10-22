@@ -2,16 +2,19 @@
    and reach the DOM through the --c / --accent custom properties. */
 
 :root {
-  --bg: #0b0d12;
-  --panel: #151922;
-  --panel-2: #1c212d;
-  --line: #2a3140;
-  --text: #e8ebf2;
-  --muted: #9aa3b5;
-  --ok: #4ade80;
-  --bad: #fb7185;
-  --focus: #93c5fd;
-  --radius: 14px;
+  /* Neutral near-black theme, inspired by crumb.gg. */
+  --bg: #0a0a0b;
+  --panel: #141416;
+  --panel-2: #1f1f22;
+  --line: #26262a;
+  --track: #2c2c30;
+  --text: #f5f5f6;
+  --muted: #8e8e95;
+  --ok: #22c55e;
+  --bad: #ef4444;
+  --focus: #d4d4d8;
+  --radius: 16px;
+  --gutter: max(16px, calc((100% - 1040px) / 2 + 16px));
 
   --learn-cell: 16px;
   --prompt-cell: 40px;
@@ -26,13 +29,14 @@
 
 body {
   margin: 0;
-  background: radial-gradient(circle at 50% -20%, #1a2030 0%, var(--bg) 60%) fixed, var(--bg);
+  background: var(--bg);
   color: var(--text);
-  font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font: 15px/1.5 "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
   min-height: 100vh;
 }
 
-h1, h2, h3 { line-height: 1.2; }
+h1, h2, h3 { line-height: 1.2; letter-spacing: -0.02em; }
 h2 { font-size: 1.35rem; margin: 1.5rem 0 0.25rem; }
 h3 { font-size: 1.05rem; margin: 0 0 0.75rem; }
 .lede { color: var(--muted); margin: 0 0 1rem; }
@@ -44,22 +48,29 @@ button, select { font: inherit; color: inherit; }
 .topbar {
   position: sticky; top: 0; z-index: 10;
   display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
-  padding: 10px 16px;
-  background: rgba(11, 13, 18, 0.85);
+  padding: 10px var(--gutter);
+  background: rgba(10, 10, 11, 0.85);
   backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--line);
 }
-.brand { font-size: 1.1rem; margin: 0; letter-spacing: 0.02em; }
-.tabs { display: flex; gap: 4px; background: var(--panel); padding: 4px; border-radius: 999px; }
+.brand { font-size: 1.15rem; font-weight: 800; margin: 0; letter-spacing: -0.03em; }
+.tabs { display: flex; gap: 2px; }
 .tab {
-  min-width: 72px; min-height: 40px; padding: 8px 16px;
+  min-height: 40px; padding: 8px 12px;
   display: grid; place-items: center;
-  border-radius: 999px; color: var(--muted); text-decoration: none; font-weight: 600;
+  border-radius: 8px; color: var(--muted); text-decoration: none; font-weight: 500;
 }
 .tab:hover { color: var(--text); }
-.tab.is-active { background: var(--panel-2); color: var(--text); box-shadow: inset 0 0 0 1px var(--line); }
+.tab.is-active { color: var(--text); font-weight: 700; }
+.topbar__right { display: flex; align-items: center; gap: 8px; }
+.icon-btn {
+  width: 44px; height: 44px; display: grid; place-items: center;
+  background: transparent; border: 1px solid var(--line); border-radius: 50%;
+  font-size: 1rem; cursor: pointer;
+}
+.icon-btn:hover { border-color: var(--muted); }
 
-main { max-width: 1040px; margin: 0 auto; padding: 8px 16px 48px; }
+main { max-width: 1040px; margin: 0 auto; padding: 16px 16px 48px; }
 
 /* ---------- Blocks ---------- */
 .board { display: grid; gap: max(1px, calc(var(--cell) * 0.07)); width: max-content; }
@@ -76,27 +87,35 @@ main { max-width: 1040px; margin: 0 auto; padding: 8px 16px 48px; }
 
 /* ---------- Buttons ---------- */
 .btn {
-  min-height: 44px; padding: 8px 16px;
-  border: 1px solid var(--line); border-radius: 10px;
+  min-height: 44px; padding: 8px 18px;
+  border: 1px solid var(--line); border-radius: 999px;
   background: var(--panel-2); cursor: pointer; font-weight: 600;
 }
 .btn:hover { border-color: var(--muted); }
 .btn--accent { background: var(--text); color: var(--bg); border-color: var(--text); }
-.btn--accent:hover { background: #fff; }
-.btn--ghost { background: transparent; color: var(--muted); }
-.select {
-  min-height: 44px; padding: 8px 12px; border-radius: 10px;
-  background: var(--panel-2); border: 1px solid var(--line);
+.btn--accent:hover { background: #fff; border-color: #fff; }
+
+/* Segmented pill control, like crumb's time-range toggles. */
+.segmented {
+  display: inline-flex; gap: 2px; padding: 4px;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 999px;
 }
+.segmented button {
+  min-height: 36px; padding: 6px 14px; border: 0; border-radius: 999px;
+  background: transparent; color: var(--muted); font-weight: 600; font-size: 0.9rem;
+  white-space: nowrap; cursor: pointer;
+}
+.segmented button:hover { color: var(--text); }
+.segmented button.is-active { background: var(--panel-2); color: var(--text); box-shadow: inset 0 0 0 1px var(--line); }
+.btn--ghost { background: transparent; color: var(--muted); }
 
 /* ---------- Learn ---------- */
-.mode-learn { padding-top: 12px; }
 .piece-grid {
   display: grid; gap: 12px;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
 }
 
-/* Cards whose .reveal text shows only on hover, keyboard focus or tap. */
+/* Cards whose .reveal text shows only on hover, keyboard focus or press-and-hold. */
 .reveal-card { position: relative; cursor: pointer; }
 .reveal-card::after {
   content: "?"; position: absolute; top: 10px; right: 12px;
@@ -107,8 +126,8 @@ main { max-width: 1040px; margin: 0 auto; padding: 8px 16px 48px; }
 /* Overlaid on the card (below its header) so revealing never shifts layout. */
 .reveal {
   position: absolute; inset: var(--reveal-top, 52px) 8px 8px 8px; z-index: 1;
-  display: grid; place-items: center; padding: 10px 12px; margin: 0;
-  background: rgba(21, 25, 34, 0.97); border-radius: 10px;
+  display: grid; place-content: center; gap: 6px; padding: 10px 12px; margin: 0;
+  background: rgba(20, 20, 22, 0.97); border-radius: 12px;
   text-align: center; overflow: auto;
   visibility: hidden; opacity: 0; transition: opacity 120ms ease;
 }
@@ -123,11 +142,10 @@ main { max-width: 1040px; margin: 0 auto; padding: 8px 16px 48px; }
 
 .piece-card {
   background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
-  border-top: 4px solid var(--accent);
-  padding: 14px; display: flex; flex-direction: column; gap: 10px;
+  padding: 16px; display: flex; flex-direction: column; gap: 12px;
 }
 .piece-card__head { display: flex; align-items: baseline; gap: 10px; }
-.piece-letter, .pair-label {
+.piece-letter {
   font-size: 2rem; font-weight: 800; color: var(--accent); line-height: 1;
   /* keeps dark hues (J blue) readable on the dark card */
   text-shadow: 0 0 1px rgba(255,255,255,0.7), 0 0 10px var(--accent);
@@ -136,30 +154,26 @@ main { max-width: 1040px; margin: 0 auto; padding: 8px 16px 48px; }
 .rotations { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
 .rotation {
   height: calc(var(--learn-cell) * 4 + 18px); display: grid; place-items: center;
-  background: var(--bg); border-radius: 8px;
+  background: var(--bg); border-radius: 10px;
 }
-.hint { margin: 0; font-size: 0.95rem; }
-
-.pairs { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
-.pair { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; }
-.pair-pieces { display: flex; align-items: center; justify-content: center; gap: 20px; }
-.pair { --reveal-top: 8px; }
-.pair-side { display: grid; justify-items: center; gap: 8px; }
-.pair-label { font-size: 1.3rem; }
-.pair-vs { color: var(--muted); font-weight: 700; }
+.mnemonic {
+  font-size: 1.6rem; font-weight: 800; color: var(--accent); line-height: 1.1;
+  text-shadow: 0 0 1px rgba(255,255,255,0.7), 0 0 10px var(--accent);
+}
+.hint { font-size: 0.9rem; color: var(--muted); }
 
 /* ---------- Quiz ---------- */
 .mode-quiz { max-width: 720px; margin: 0 auto; }
-.quiz-toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
-.quiz-toolbar .select { flex: 1 1 180px; }
+.quiz-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 16px; }
 
+/* Stat tiles: Stats page header and speed-round results. */
 .scoreboard { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 12px; }
 .stat {
-  background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
-  padding: 8px; display: grid; justify-items: center;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
+  padding: 12px 14px; display: flex; flex-direction: column-reverse; align-items: flex-start; gap: 2px;
 }
-.stat__value { font-size: 1.35rem; font-weight: 700; font-variant-numeric: tabular-nums; }
-.stat__label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+.stat__value { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.stat__label { font-size: 0.8rem; color: var(--muted); }
 
 /* Fixed width so the toolbar never moves when the timer replaces the label. */
 .speed-btn {
@@ -175,37 +189,90 @@ main { max-width: 1040px; margin: 0 auto; padding: 8px 16px 48px; }
 }
 
 .quiz-play { position: relative; }
-.round-over {
-  position: absolute; inset: 0; z-index: 2;
-  display: grid; place-content: center; justify-items: center; gap: 8px;
-  background: rgba(11, 13, 18, 0.9); border-radius: var(--radius);
+
+/* Speed-round results, overlaid on the question area. */
+.results {
+  position: absolute; inset: 0; z-index: 3;
+  display: grid; place-content: center; justify-items: center; gap: 10px; padding: 16px;
+  background: rgba(10, 10, 11, 0.95); border-radius: var(--radius);
+  animation: fade-in 200ms ease;
 }
-.round-over[hidden] { display: none; }
-.round-over__score { font-size: 4rem; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
-.round-over__sub { color: var(--muted); font-weight: 600; margin-bottom: 8px; }
+.results[hidden] { display: none; }
+.results__score { font-size: 4.5rem; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
+.results__sub { color: var(--muted); font-weight: 600; }
+.results__stats { display: grid; grid-template-columns: repeat(3, minmax(90px, 1fr)); gap: 8px; margin: 6px 0 4px; }
+
+/* ---------- Quiz effects (overlaid, never affect layout) ---------- */
+.fx-layer { position: absolute; inset: 0; z-index: 2; pointer-events: none; overflow: visible; }
+
+/* tetr.io-style combo popup, in the answered piece's color. */
+.combo {
+  position: absolute; left: 50%; top: 22%;
+  display: grid; justify-items: center; line-height: 1;
+  color: #fff; font-weight: 900; letter-spacing: 0.04em;
+  text-shadow: 0 0 2px var(--accent), 0 0 14px var(--accent), 0 0 28px var(--accent);
+  transform: translate(-50%, -50%) scale(var(--size));
+  animation: combo-pop 700ms cubic-bezier(.2,.9,.3,1.3) forwards;
+}
+.combo__n { font-size: 3rem; }
+.combo__label { font-size: 0.95rem; letter-spacing: 0.3em; }
+.combo--big .combo__n { font-size: 4.2rem; }
+@keyframes combo-pop {
+  0%   { opacity: 0; transform: translate(-50%, -30%) scale(calc(var(--size) * 0.5)); }
+  20%  { opacity: 1; transform: translate(-50%, -50%) scale(calc(var(--size) * 1.15)); }
+  35%  { transform: translate(-50%, -50%) scale(var(--size)); }
+  75%  { opacity: 1; }
+  100% { opacity: 0; transform: translate(-50%, -90%) scale(var(--size)); }
+}
+
+/* Blocks bursting out of the prompt every 5 in a row. */
+.burst-block {
+  --cell: 16px;
+  position: absolute; margin: -8px 0 0 -8px;
+  animation: burst 650ms cubic-bezier(.15,.7,.3,1) forwards;
+}
+@keyframes burst {
+  from { opacity: 1; transform: translate(0, 0) rotate(0) scale(1); }
+  to   { opacity: 0; transform: translate(var(--dx), var(--dy)) rotate(var(--spin)) scale(0.4); }
+}
+
+.q-stage.is-popping { animation: pop 260ms ease; }
+@keyframes pop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.12); }
+  100% { transform: scale(1); }
+}
+.q-card.is-shaking { animation: shake-hard 320ms ease; }
+@keyframes shake-hard {
+  20% { transform: translateX(-8px); }
+  40% { transform: translateX(7px); }
+  60% { transform: translateX(-5px); }
+  80% { transform: translateX(3px); }
+}
+@keyframes fade-in { from { opacity: 0; } }
 
 .q-card {
   background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
   padding: 16px; text-align: center;
 }
-.q-prompt { margin: 0 0 8px; font-weight: 600; font-size: 1.1rem; }
+.q-prompt { margin: 0 0 8px; font-weight: 700; font-size: 1.15rem; letter-spacing: -0.01em; }
 .q-stage { height: calc(var(--prompt-cell) * 4.3); display: grid; place-items: center; }
-.feedback { min-height: 1.6em; font-weight: 600; }
-.feedback--ok { color: var(--ok); }
-.feedback--bad { color: var(--bad); }
 
 .options { display: grid; gap: 8px; margin-top: 12px; grid-template-columns: repeat(4, 1fr); }
 .option {
   /* Same fixed size for every question type so the grid never resizes. */
   position: relative; height: 96px; padding: 10px 6px 8px;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
-  background: var(--panel); border: 2px solid var(--line); border-radius: 12px; cursor: pointer;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 14px; cursor: pointer;
   transition: transform 80ms ease, border-color 120ms ease;
 }
-.option:hover { border-color: var(--muted); }
+.option:hover { border-color: #3a3a40; background: #18181b; }
 .option:active { transform: scale(0.97); }
-.option.is-correct { border-color: var(--ok); background: rgba(74, 222, 128, 0.12); }
-.option.is-wrong { border-color: var(--bad); background: rgba(251, 113, 133, 0.12); animation: shake 250ms; }
+.option.is-correct {
+  border-color: var(--ok); background: rgba(34, 197, 94, 0.12);
+  box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.35), 0 0 18px rgba(34, 197, 94, 0.3);
+}
+.option.is-wrong { border-color: var(--bad); background: rgba(239, 68, 68, 0.12); box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.35); animation: shake 250ms; }
 .opt-key {
   position: absolute; top: 4px; left: 6px;
   font: 600 0.7rem/1 ui-monospace, monospace; color: var(--muted);
@@ -222,14 +289,17 @@ main { max-width: 1040px; margin: 0 auto; padding: 8px 16px 48px; }
 }
 
 /* ---------- Stats ---------- */
-.mode-stats { padding-top: 12px; }
 .table-wrap { overflow-x: auto; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); margin-bottom: 12px; }
 .stats-table { width: 100%; border-collapse: collapse; }
 .stats-table th, .stats-table td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--line); white-space: nowrap; }
 .stats-table tr:last-child td { border-bottom: 0; }
-.stats-table th { color: var(--muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; }
+.stats-table th { color: var(--muted); font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; }
 .stats-table .num { text-align: right; font-variant-numeric: tabular-nums; }
 .stats-table .is-weak { color: var(--bad); font-weight: 700; }
+.acc-cell { display: flex; align-items: center; gap: 12px; }
+.bar { width: 120px; height: 6px; border-radius: 999px; background: var(--track); overflow: hidden; }
+.bar span { display: block; height: 100%; border-radius: inherit; background: var(--text); }
+.acc-cell .num { min-width: 3ch; text-align: right; }
 .cell-piece { display: flex; align-items: center; gap: 10px; }
 .cell-piece .board { min-width: 42px; }
 
@@ -243,16 +313,31 @@ main { max-width: 1040px; margin: 0 auto; padding: 8px 16px 48px; }
   .piece-card { --reveal-top: 44px; }
   .reveal { font-size: 0.85rem; padding: 8px; }
   .brand { font-size: 1rem; }
-  .tab { min-width: 0; padding: 8px 12px; }
+  .tab { padding: 8px 8px; }
+  .quiz-toolbar { flex-direction: column; align-items: stretch; }
+  .segmented { display: grid; grid-template-columns: 1fr 1fr; border-radius: 16px; }
+  .segmented button { border-radius: 12px; }
+  .speed-btn { width: 100%; }
+  .bar { width: 64px; }
   .scoreboard { gap: 6px; }
   .stat { padding: 6px 2px; }
   .stat__value { font-size: 1.05rem; }
   .stat__label { font-size: 0.6rem; letter-spacing: 0.03em; }
   .q-card { padding: 10px; }
+  .topbar { flex-wrap: nowrap; }
+  .topbar__right { gap: 6px; }
+  .icon-btn { width: 40px; height: 40px; }
+  .results__stats { grid-template-columns: repeat(3, minmax(80px, 1fr)); }
   .options { grid-template-columns: repeat(4, 1fr); gap: 6px; }
   .option { height: 84px; padding: 8px 4px 6px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .option.is-wrong { animation: none; }
+  .option.is-wrong, .q-card.is-shaking, .q-stage.is-popping { animation: none; }
+  .burst-block { display: none; }
+  .combo { animation-name: combo-fade; }
+}
+@keyframes combo-fade {
+  0%, 70% { opacity: 1; }
+  100% { opacity: 0; }
 }

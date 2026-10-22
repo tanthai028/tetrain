@@ -3,6 +3,7 @@
 // src/modes/<name>.js and register it in MODES below.
 
 import { loadStats } from './stats.js';
+import { isMuted, setMuted } from './sfx.js';
 import { createLearnMode } from './modes/learn.js';
 import { createQuizMode } from './modes/quiz.js';
 import { createStatsMode } from './modes/stats.js';
@@ -44,6 +45,22 @@ function show(id) {
 function lastTab() {
   try { return localStorage.getItem(LAST_TAB_KEY); } catch { return null; }
 }
+
+// Sound toggle: the speaker button, or M on the keyboard.
+const muteBtn = document.getElementById('mute');
+function drawMute() {
+  muteBtn.textContent = isMuted() ? '🔇' : '🔊';
+  muteBtn.setAttribute('aria-label', isMuted() ? 'Unmute sound (M)' : 'Mute sound (M)');
+  muteBtn.title = muteBtn.getAttribute('aria-label');
+}
+muteBtn.addEventListener('click', () => { setMuted(!isMuted()); drawMute(); });
+document.addEventListener('keydown', (e) => {
+  if (e.key.toLowerCase() !== 'm' || e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
+  if (e.target instanceof HTMLSelectElement || e.target instanceof HTMLInputElement) return;
+  setMuted(!isMuted());
+  drawMute();
+});
+drawMute();
 
 window.addEventListener('hashchange', () => show(location.hash.slice(1)));
 show(location.hash.slice(1) || lastTab() || 'learn');
