@@ -39,43 +39,43 @@ Rotations follow SRS, the standard rotation system in modern Tetris.
 
 ## Development
 
-Plain HTML/CSS/JS with native ES modules. No framework, no build step and no dependencies.
+Plain HTML/CSS/JS with native ES modules. No framework, no build step and no npm dependencies. The only thing loaded from elsewhere is the Inter font from Google Fonts; without it the system font is used.
 
 ```bash
 npm run dev
 ```
 
-The dev server runs at http://localhost:5173 and needs Node 20+. Browsers block ES modules on `file://` URLs, so opening `index.html` straight from disk won't work.
+The dev server runs at http://localhost:5173. You need Node 22 or newer, since the test command relies on file-pattern support added in Node 21. Browsers block ES modules on `file://` URLs, so opening `index.html` straight from disk won't work.
 
 ```bash
 npm test
 ```
 
-The tests use Node's built-in test runner. They check that every piece has exactly 4 cells in all 4 rotations, that each rotation is the previous one turned clockwise, that the colors match the guideline, and that board placement and stats weighting work. `/test.html` shows every piece in every rotation for a visual check.
+The tests use Node's built-in test runner. They check that every piece has exactly 4 cells in all 4 rotations, that each rotation is the previous one turned clockwise, that the colors match the guideline and every rotation fits the 4×4 spawn frame, and that board placement, stats weighting and loading saved stats work. `/test.html` shows every piece in every rotation for a visual check.
 
 **Deploys:** every push to `main` goes live at tetrain-gg.vercel.app through Vercel. Other branches get preview links. `vercel.json` tells Vercel to serve the repo root as-is, minus the dev files listed in `.vercelignore`.
 
 ### Where the piece data lives
 
-**`src/pieces.js` is the single source of truth.** It holds each piece's color, mnemonic, description, cell coordinates for all four SRS rotations (`0`, `R`, `2`, `L`) and the confusable pairs. Nothing else hardcodes a piece color, and every piece is drawn from this data as a grid of cells.
+**`src/pieces.js` is the single source of truth.** It holds each piece's color, mnemonic, description, cell coordinates for all four SRS rotations (`0`, `R`, `2`, `L`), where it sits in the 4×4 spawn frame, and the J/L and S/Z pairs that the quiz drills harder. Nothing else hardcodes a piece color, and every piece is drawn from this data as a grid of cells.
 
 ### Project layout
 
 ```
-index.html          app shell (tab bar + <main>)
-styles.css          dark theme, beveled block cells, mobile layout
+index.html          app shell (top bar with tabs and mute button, <main>)
+styles.css          dark theme, beveled block cells, quiz effects, mobile layout
 test.html           visual check: every piece × every rotation
 serve.js            zero-dependency dev server
 vercel.json         static hosting config
 .vercelignore       dev files kept off the live site
 src/
-  pieces.js         piece data (colors, hints, SRS rotations)  ← source of truth
+  pieces.js         piece data (colors, mnemonics, SRS rotations, spawn frame)  ← source of truth
   board.js          board model: 2D array, canPlace, place, legalPlacements …
   render.js         renderBoard / renderPiece / renderSwatch (DOM grid)
-  stats.js          localStorage stats + weighted piece selection
+  stats.js          saved stats, timed-run lengths and bests, weighted piece selection
   sfx.js            synthesized sound effects (Web Audio) + mute setting
   dom.js            tiny element helper + formatters
-  main.js           tab navigation; registers modes
+  main.js           tab navigation (remembers last tab), mute toggle; registers modes
   modes/            learn.js, quiz.js, stats.js
 tests/              node --test unit tests
 ```

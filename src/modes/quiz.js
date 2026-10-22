@@ -14,6 +14,8 @@ export const QUESTION_TYPES = {
   'shape-name': { label: 'Shape → Name', prompt: 'Which letter?' },
 };
 const TYPE_ORDER = Object.keys(QUESTION_TYPES);
+// Fixed left-to-right order of the answer buttons (and keys 1–7) in every question type.
+const ANSWER_ORDER = ['Z', 'S', 'J', 'L', 'O', 'T', 'I'];
 
 const CORRECT_PAUSE_MS = 350;
 const WRONG_FLASH_MS = 1000;
@@ -22,15 +24,6 @@ const MILESTONE_EVERY = 5;
 const BURST_BLOCKS = 12;
 
 const randomRotation = () => Math.floor(Math.random() * 4);
-
-function shuffle(list) {
-  const a = list.slice();
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
 
 // Restart a CSS animation class on an element.
 function replay(el, className) {
@@ -136,14 +129,13 @@ export function createQuizMode(app) {
   function buildQuestion() {
     const type = nextType();
     const target = pickWeighted(app.stats, { avoid: question?.target });
-    // Each option is an answer piece id. Shape options get their own random
-    // rotation and are shuffled so screen position can't give the answer away.
-    const optionIds = type === 'color-shape' ? shuffle(PIECE_IDS) : PIECE_IDS;
+    // Each option is an answer piece id, always in ANSWER_ORDER. Shape
+    // options get their own random rotation every question.
     return {
       type,
       target,
       rotation: randomRotation(),
-      options: optionIds.map((id) => ({ id, rotation: randomRotation() })),
+      options: ANSWER_ORDER.map((id) => ({ id, rotation: randomRotation() })),
     };
   }
 
