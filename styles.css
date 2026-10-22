@@ -18,10 +18,10 @@
 
   --learn-cell: 16px;
   --prompt-cell: 40px;
-  /* Color → Shape: the color block is about one answer shape wide, so the two read as the same scale. */
-  --swatch-size: 80px;
-  --opt-cell: 18px;
-  --opt-swatch: 40px;
+  --opt-cell: 22px;
+  --swatch-size: calc(var(--opt-cell) * 4); /* as wide as an I in the answers */
+  --opt-swatch: 46px;
+  --opt-height: 120px; /* same for every question type, so the grid never resizes */
 
   color-scheme: dark;
 }
@@ -277,7 +277,7 @@ main { max-width: 1040px; margin: 0 auto; padding: 16px 16px 48px; }
 .options { display: grid; gap: 8px; margin-top: 12px; grid-template-columns: repeat(4, 1fr); }
 .option {
   /* Same fixed size for every question type so the grid never resizes. */
-  position: relative; height: 100px; padding: 10px 6px 8px;
+  position: relative; height: var(--opt-height); padding: 10px 6px 8px;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
   background: var(--panel); border: 1px solid var(--line); border-radius: 14px; cursor: pointer;
   transition: transform 80ms ease, border-color 120ms ease;
@@ -296,8 +296,8 @@ main { max-width: 1040px; margin: 0 auto; padding: 16px 16px 48px; }
 .opt-label { font-size: 0.85rem; font-weight: 600; }
 /* Key numbers only matter with a keyboard. */
 @media (hover: none) { .opt-key { display: none; } }
-.opt-letter { font-size: 1.8rem; font-weight: 800; }
-.opt-piece { height: calc(var(--opt-cell) * 4.4); display: grid; place-items: center; }
+.opt-letter { font-size: 2.2rem; font-weight: 800; }
+.opt-piece { height: calc(var(--opt-cell) * 4.3); display: grid; place-items: center; }
 
 @keyframes shake {
   25% { transform: translateX(-4px); }
@@ -327,7 +327,7 @@ main { max-width: 1040px; margin: 0 auto; padding: 16px 16px 48px; }
 }
 
 @media (max-width: 560px) {
-  :root { --prompt-cell: 28px; --swatch-size: 56px; --opt-cell: 15px; --opt-swatch: 34px; --learn-cell: 11px; }
+  :root { --prompt-cell: 28px; --opt-cell: 15px; --opt-swatch: 34px; --opt-height: 88px; --learn-cell: 11px; }
   .piece-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
   .piece-card { padding: 10px; gap: 8px; }
   .piece-letter { font-size: 1.6rem; }
@@ -355,7 +355,8 @@ main { max-width: 1040px; margin: 0 auto; padding: 16px 16px 48px; }
   .results .stat__value { font-size: 1.2rem; }
   .results .stat__label { font-size: 0.72rem; }
   .options { grid-template-columns: repeat(4, 1fr); gap: 6px; }
-  .option { height: 84px; padding: 8px 4px 6px; }
+  .option { padding: 8px 4px 6px; }
+  .opt-letter { font-size: 1.8rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {
