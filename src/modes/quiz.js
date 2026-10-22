@@ -1,6 +1,6 @@
 // Quiz mode: three question types, random rotations, weighted piece selection,
 // combo popups + sound on streaks, keyboard answers (1–7 or the piece letter)
-// and an optional 60-second speed round whose results show accuracy and speed.
+// and optional 30- or 60-second timed runs whose results show accuracy and speed.
 
 import { PIECE_IDS, PIECES } from '../pieces.js';
 import { renderPiece, renderSwatch } from '../render.js';
@@ -17,7 +17,8 @@ const TYPE_ORDER = Object.keys(QUESTION_TYPES);
 
 const CORRECT_PAUSE_MS = 350;
 const WRONG_FLASH_MS = 1000;
-const SPEED_ROUND_MS = 60_000;
+const RUN_LENGTHS = [30, 60]; // seconds
+const RUN_LENGTH_KEY = 'tetrain:run-length';
 const MILESTONE_EVERY = 5;
 const BURST_BLOCKS = 12;
 
@@ -41,6 +42,19 @@ function replay(el, className) {
 
 const emptyRun = () => ({ attempts: 0, correct: 0, totalMs: 0, bestStreak: 0 });
 
+function loadRunLength() {
+  try {
+    const sec = Number(localStorage.getItem(RUN_LENGTH_KEY));
+    return RUN_LENGTHS.includes(sec) ? sec : 60;
+  } catch {
+    return 60;
+  }
+}
+
+function saveRunLength(sec) {
+  try { localStorage.setItem(RUN_LENGTH_KEY, String(sec)); } catch { /* storage unavailable */ }
+}
+
 export function createQuizMode(app) {
   let typeFilter = 'mixed';
   let mixedIndex = 0;
@@ -50,7 +64,7 @@ export function createQuizMode(app) {
   let advanceTimer = null;
   let pendingResume = null; // set while the speed-round results are up
   let streak = 0;
-  const speed = { active: false, endsAt: 0, timer: null, run: emptyRun() };
+  const speed = { active: false, endsAt: 0, timer: null, run: emptyRun(), seconds: loadRunLength() };
 
   // ---- DOM -------------------------------------------------------------
   // Segmented control: one click to switch question type.
@@ -69,10 +83,33 @@ export function createQuizMode(app) {
   }
   drawTypeSeg();
 
-  // The speed-round timer lives inside this button so nothing shifts when a round starts.
-  const SPEED_LABEL = '⚡ 60s speed round';
-  const speedBtn = h('button', { class: 'btn btn--accent speed-btn', type: 'button' }, SPEED_LABEL);
+  // Timed run: pick a length, then Start. While running, the Start button
+  // shows the countdown (and stops the run), so nothing shifts.
+  const lengthSeg = h('div', { class: 'segmented', role: 'radiogroup', 'aria-label': 'Timed run length' },
+    RUN_LENGTHS.map((sec) => {
+      const btn = h('button', { type: 'button', role: 'radio', 'data-value': String(sec) }, `${sec}s`);
+      btn.addEventListener('click', () => {
+        if (speed.active) return;
+        speed.seconds = sec;
+        saveRunLength(sec);
+        drawLengthSeg();
+      });
+      return btn;
+    }));
+  function drawLengthSeg() {
+    for (const btn of lengthSeg.children) {
+      const on = Number(btn.dataset.value) === speed.seconds;
+      btn.classList.toggle('is-active', on);
+      btn.setAttribute('aria-checked', String(on));
+      btn.disabled = speed.active && !on;
+    }
+  }
+  drawLengthSeg();
+
+  const START_LABEL = '▶ Start timed run';
+  const speedBtn = h('button', { class: 'btn btn--accent speed-btn', type: 'button' }, START_LABEL);
   speedBtn.addEventListener('click', () => (speed.active ? endSpeedRound(true) : startSpeedRound()));
+  const timedGroup = h('div', { class: 'timed-group' }, lengthSeg, speedBtn);
 
   const promptText = h('p', { class: 'q-prompt' });
   const stage = h('div', { class: 'q-stage' });
@@ -84,7 +121,7 @@ export function createQuizMode(app) {
   const results = h('div', { class: 'results', hidden: true });
 
   const el = h('section', { class: 'mode mode-quiz' },
-    h('div', { class: 'quiz-toolbar' }, typeSeg, speedBtn),
+    h('div', { class: 'quiz-toolbar' }, typeSeg, timedGroup),
     h('div', { class: 'quiz-play' }, card, options, fx, results),
   );
 
@@ -237,10 +274,11 @@ export function createQuizMode(app) {
   function startSpeedRound() {
     speed.active = true;
     speed.run = emptyRun();
-    speed.endsAt = performance.now() + SPEED_ROUND_MS;
+    speed.endsAt = performance.now() + speed.seconds * 1000;
     streak = 0;
     speedBtn.classList.add('is-running');
-    speedBtn.title = 'Stop speed round';
+    speedBtn.title = 'Stop timed run';
+    drawLengthSeg();
     playStart();
     tickSpeed();
     speed.timer = setInterval(tickSpeed, 100);
@@ -249,8 +287,8 @@ export function createQuizMode(app) {
 
   function tickSpeed() {
     const left = Math.max(0, speed.endsAt - performance.now());
-    speedBtn.style.setProperty('--progress', String(left / SPEED_ROUND_MS));
-    speedBtn.textContent = `⏱ ${(left / 1000).toFixed(1)}s · ${speed.run.correct} ✓`;
+    speedBtn.style.setProperty('--progress', String(left / (speed.seconds * 1000)));
+    speedBtn.textContent = `■ ${(left / 1000).toFixed(1)}s · ${speed.run.correct} ✓`;
     if (left <= 0) endSpeedRound(false);
   }
 
@@ -259,12 +297,14 @@ export function createQuizMode(app) {
     speed.active = false;
     speedBtn.classList.remove('is-running');
     speedBtn.removeAttribute('title');
-    speedBtn.textContent = SPEED_LABEL;
+    speedBtn.textContent = START_LABEL;
+    drawLengthSeg();
     if (cancelled) return;
 
     const { run } = speed;
-    const isBest = run.correct > app.stats.bestSpeedRound;
-    app.stats.bestSpeedRound = Math.max(app.stats.bestSpeedRound, run.correct);
+    const prevBest = app.stats.bestRuns[speed.seconds] ?? 0;
+    const isBest = run.correct > prevBest;
+    app.stats.bestRuns[speed.seconds] = Math.max(prevBest, run.correct);
     app.stats.bestStreak = Math.max(app.stats.bestStreak, run.bestStreak);
     saveStats(app.stats);
     clearTimeout(advanceTimer);
@@ -275,7 +315,8 @@ export function createQuizMode(app) {
       h('span', { class: 'stat__value' }, value), h('span', { class: 'stat__label' }, label));
     results.replaceChildren(
       h('div', { class: 'results__score' }, String(run.correct)),
-      h('div', { class: 'results__sub' }, isBest ? '🏆 new best' : `best ${app.stats.bestSpeedRound}`),
+      h('div', { class: 'results__sub' },
+        `${speed.seconds}s · ${isBest ? '🏆 new best' : `best ${app.stats.bestRuns[speed.seconds]}`}`),
       h('div', { class: 'results__stats' },
         tile(formatPct(run.attempts ? run.correct / run.attempts : null), 'Accuracy'),
         tile(formatMs(run.attempts ? run.totalMs / run.attempts : null), 'Avg time'),

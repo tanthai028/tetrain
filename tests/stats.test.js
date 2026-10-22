@@ -55,3 +55,10 @@ test('load/save survive missing or throwing localStorage', () => {
   assert.doesNotThrow(() => saveStats(emptyStats()));
   delete globalThis.localStorage;
 });
+
+test('older saves keep their 60-second best as bestRuns[60]', () => {
+  const saved = JSON.stringify({ ...emptyStats(), bestRuns: undefined, bestSpeedRound: 17 });
+  globalThis.localStorage = { getItem: () => saved, setItem: () => {} };
+  assert.deepEqual(loadStats().bestRuns, { 60: 17 });
+  delete globalThis.localStorage;
+});

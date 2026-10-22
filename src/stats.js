@@ -17,7 +17,8 @@ function emptyPieceStats() {
 export function emptyStats() {
   const pieces = {};
   for (const id of PIECE_IDS) pieces[id] = emptyPieceStats();
-  return { pieces, bestStreak: 0, bestSpeedRound: 0 };
+  // bestRuns: best correct answers per timed-run length in seconds, e.g. { 30: 12, 60: 25 }.
+  return { pieces, bestStreak: 0, bestRuns: {} };
 }
 
 export function loadStats() {
@@ -28,7 +29,9 @@ export function loadStats() {
     const stats = emptyStats();
     for (const id of PIECE_IDS) Object.assign(stats.pieces[id], parsed.pieces?.[id]);
     stats.bestStreak = parsed.bestStreak ?? 0;
-    stats.bestSpeedRound = parsed.bestSpeedRound ?? 0;
+    stats.bestRuns = { ...parsed.bestRuns };
+    // Older saves only had a 60-second best.
+    if (parsed.bestSpeedRound && !stats.bestRuns[60]) stats.bestRuns[60] = parsed.bestSpeedRound;
     return stats;
   } catch {
     return emptyStats();

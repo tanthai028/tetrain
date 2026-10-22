@@ -167,7 +167,7 @@ main { max-width: 1040px; margin: 0 auto; padding: 16px 16px 48px; }
 .quiz-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 16px; }
 
 /* Stat tiles: Stats page header and speed-round results. */
-.scoreboard { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 12px; }
+.scoreboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; margin-bottom: 12px; }
 .stat {
   background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
   padding: 12px 14px; display: flex; flex-direction: column-reverse; align-items: flex-start; gap: 2px;
@@ -175,12 +175,16 @@ main { max-width: 1040px; margin: 0 auto; padding: 16px 16px 48px; }
 .stat__value { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
 .stat__label { font-size: 0.8rem; color: var(--muted); }
 
+.timed-group { display: flex; align-items: center; gap: 8px; }
 /* Fixed width so the toolbar never moves when the timer replaces the label. */
 .speed-btn {
   --progress: 1;
   position: relative; isolation: isolate; overflow: hidden;
-  width: 12.5rem; font-variant-numeric: tabular-nums; white-space: nowrap;
+  width: 11.5rem; font-variant-numeric: tabular-nums; white-space: nowrap;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.08);
 }
+.speed-btn:not(.is-running):hover { box-shadow: 0 0 0 6px rgba(255, 255, 255, 0.12); }
+.segmented button:disabled { opacity: 0.35; cursor: default; }
 .speed-btn.is-running { background: var(--panel-2); color: var(--text); border-color: var(--line); }
 .speed-btn.is-running::before {
   content: ""; position: absolute; inset: 0; z-index: -1;
@@ -317,7 +321,9 @@ main { max-width: 1040px; margin: 0 auto; padding: 16px 16px 48px; }
   .quiz-toolbar { flex-direction: column; align-items: stretch; }
   .segmented { display: grid; grid-template-columns: 1fr 1fr; border-radius: 16px; }
   .segmented button { border-radius: 12px; }
-  .speed-btn { width: 100%; }
+  .timed-group .segmented { display: inline-flex; border-radius: 999px; flex: none; }
+  .timed-group .segmented button { border-radius: 999px; }
+  .speed-btn { flex: 1; width: auto; }
   .bar { width: 64px; }
   .scoreboard { gap: 6px; }
   .stat { padding: 6px 2px; }
