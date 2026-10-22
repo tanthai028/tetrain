@@ -116,12 +116,13 @@ export function createQuizMode(app) {
   const options = h('div', { class: 'options' });
   // Popups and bursts are drawn on this layer, on top of everything.
   const fx = h('div', { class: 'fx-layer', 'aria-hidden': 'true' });
-  // Speed-round results, overlaid on the question area.
+  // Timed-run results, overlaid on (and blurring) the whole quiz, toolbar included.
   const results = h('div', { class: 'results', hidden: true });
 
   const el = h('section', { class: 'mode mode-quiz' },
     h('div', { class: 'quiz-toolbar' }, typeSeg, timedGroup),
-    h('div', { class: 'quiz-play' }, card, options, fx, results),
+    h('div', { class: 'quiz-play' }, card, options, fx),
+    results,
   );
 
   // ---- Question flow ---------------------------------------------------
@@ -281,7 +282,9 @@ export function createQuizMode(app) {
     playStart();
     tickSpeed();
     speed.timer = setInterval(tickSpeed, 100);
-    nextQuestion();
+    // Keep the question that's on screen; its answer time starts with the run.
+    // (If an answer is mid-feedback, the pending advance brings the next one.)
+    if (!locked) shownAt = performance.now();
   }
 
   function tickSpeed() {
