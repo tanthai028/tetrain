@@ -1,8 +1,8 @@
-# tetrain.gg
+# tetrain
 
-**Play it at [tetrain-gg.vercel.app](https://tetrain-gg.vercel.app).**
+**Play it at [tetrain.vercel.app](https://tetrain.vercel.app).**
 
-tetrain.gg helps you memorize the Tetris Guideline piece colors and shapes until you recognize every piece, in any rotation, instantly. It works on desktop and on your phone.
+tetrain helps you memorize the Tetris Guideline piece colors and shapes until you recognize every piece, in any rotation, instantly. It works on desktop and on your phone.
 
 ## Modes
 
@@ -53,7 +53,7 @@ npm test
 
 The tests use Node's built-in test runner. They check that every piece has exactly 4 cells in all 4 rotations, that each rotation is the previous one turned clockwise, that the colors match the guideline and every rotation fits the 4×4 spawn frame, and that board placement, stats weighting and loading saved stats work. `/test.html` shows every piece in every rotation for a visual check.
 
-**Deploys:** every push to `main` goes live at tetrain-gg.vercel.app through Vercel. Other branches get preview links. `vercel.json` tells Vercel to serve the repo root as-is, minus the dev files listed in `.vercelignore`.
+**Deploys:** every push to `main` goes live at tetrain.vercel.app through Vercel. Other branches get preview links. `vercel.json` tells Vercel to serve the repo root as-is, minus the dev files listed in `.vercelignore`.
 
 ### Where the piece data lives
 

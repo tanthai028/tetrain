@@ -1,4 +1,4 @@
-/* tetrain.gg — UI chrome only. Piece colors come from src/pieces.js
+/* tetrain — UI chrome only. Piece colors come from src/pieces.js
    and reach the DOM through the --c / --accent custom properties. */
 
 :root {
