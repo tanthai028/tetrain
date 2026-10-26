@@ -56,7 +56,7 @@ export const PIECES = {
     boxSize: 3,
     frameOffset: [0, 0],
     description: '3 in a row, bump in the middle',
-    mnemonic: 'testicle',
+    mnemonic: 'thanos',
     rotations: [
       [[1, 0], [0, 1], [1, 1], [2, 1]],
       [[1, 0], [1, 1], [2, 1], [1, 2]],

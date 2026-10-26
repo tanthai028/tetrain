@@ -20,7 +20,6 @@
   --prompt-cell: 40px;
   --opt-cell: 22px;
   --swatch-size: calc(var(--opt-cell) * 4); /* as wide as an I in the answers */
-  --opt-swatch: 46px;
   --opt-height: 120px; /* same for every question type, so the grid never resizes */
 
   color-scheme: dark;
@@ -327,7 +326,7 @@ main { max-width: 1040px; margin: 0 auto; padding: 16px 16px 48px; }
 }
 
 @media (max-width: 560px) {
-  :root { --prompt-cell: 28px; --opt-cell: 15px; --opt-swatch: 34px; --opt-height: 88px; --learn-cell: 11px; }
+  :root { --prompt-cell: 28px; --opt-cell: 15px; --opt-height: 88px; --learn-cell: 11px; }
   .piece-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
   .piece-card { padding: 10px; gap: 8px; }
   .piece-letter { font-size: 1.6rem; }
@@ -339,6 +338,7 @@ main { max-width: 1040px; margin: 0 auto; padding: 16px 16px 48px; }
   .quiz-toolbar { flex-direction: column; align-items: stretch; }
   .segmented { display: grid; grid-template-columns: 1fr 1fr; border-radius: 16px; }
   .segmented button { border-radius: 12px; }
+  .type-seg button[data-value="mixed"] { grid-column: 1 / -1; }
   .timed-group .segmented { display: inline-flex; border-radius: 999px; flex: none; }
   .timed-group .segmented button { border-radius: 999px; }
   .speed-btn { flex: 1; width: auto; }

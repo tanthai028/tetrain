@@ -1,4 +1,4 @@
-// Quiz mode: three question types, random rotations, weighted piece selection,
+// Quiz mode: two question types, random rotations, weighted piece selection,
 // combo popups + sound on streaks, keyboard answers (1–7 or the piece letter)
 // and optional 15- or 30-second timed runs whose results show accuracy and speed.
 
@@ -9,9 +9,8 @@ import { playCorrect, playMilestone, playWrong, playStart, playEnd } from '../sf
 import { h, formatMs, formatPct } from '../dom.js';
 
 export const QUESTION_TYPES = {
-  'shape-color': { label: 'Shape → Color', prompt: 'What color?' },
   'color-shape': { label: 'Color → Shape', prompt: 'Which piece?' },
-  'shape-name': { label: 'Shape → Name', prompt: 'Which letter?' },
+  'shape-letter': { label: 'Shape → Letter', prompt: 'Which letter?' },
 };
 const TYPE_ORDER = Object.keys(QUESTION_TYPES);
 // Fixed left-to-right order of the answer buttons (and keys 1–7) in every question type.
@@ -60,7 +59,7 @@ export function createQuizMode(app) {
 
   // ---- DOM -------------------------------------------------------------
   // Segmented control: one click to switch question type.
-  const typeSeg = h('div', { class: 'segmented', role: 'radiogroup', 'aria-label': 'Question type' },
+  const typeSeg = h('div', { class: 'segmented type-seg', role: 'radiogroup', 'aria-label': 'Question type' },
     [['mixed', 'Mixed'], ...TYPE_ORDER.map((t) => [t, QUESTION_TYPES[t].label])].map(([value, label]) => {
       const btn = h('button', { type: 'button', role: 'radio', 'data-value': value }, label);
       btn.addEventListener('click', () => { typeFilter = value; drawTypeSeg(); nextQuestion(); });
@@ -139,20 +138,18 @@ export function createQuizMode(app) {
     };
   }
 
-  function renderPrompt(colored) {
+  function renderPrompt() {
     const { type, target, rotation } = question;
     if (type === 'color-shape') {
       stage.replaceChildren(renderSwatch(target, { cellSize: 'var(--swatch-size)' }));
     } else {
-      stage.replaceChildren(renderPiece(target, rotation, { gray: !colored, cellSize: 'var(--prompt-cell)' }));
+      stage.replaceChildren(renderPiece(target, rotation, { cellSize: 'var(--prompt-cell)' }));
     }
   }
 
   function renderOption({ id, rotation }, index) {
     let content;
-    if (question.type === 'shape-color') {
-      content = [renderSwatch(id, { cellSize: 'var(--opt-swatch)' }), h('span', { class: 'opt-label' }, PIECES[id].colorName)];
-    } else if (question.type === 'color-shape') {
+    if (question.type === 'color-shape') {
       content = [h('div', { class: 'opt-piece' }, renderPiece(id, rotation, { gray: true, cellSize: 'var(--opt-cell)' }))];
     } else {
       content = [h('span', { class: 'opt-letter' }, id)];
@@ -170,7 +167,7 @@ export function createQuizMode(app) {
     results.hidden = true;
     question = buildQuestion();
     promptText.textContent = QUESTION_TYPES[question.type].prompt;
-    renderPrompt(false);
+    renderPrompt();
     options.className = `options options--${question.type}`;
     options.replaceChildren(...question.options.map((o, i) => renderOption(o, i)));
     shownAt = performance.now();
@@ -206,7 +203,7 @@ export function createQuizMode(app) {
   // Show the correct answer in color and mark the picked one.
   function revealAnswer(answeredId) {
     const { target, type } = question;
-    renderPrompt(true);
+    renderPrompt();
     replay(stage, 'is-popping');
     question.options.forEach((opt, i) => {
       const btn = options.children[i];

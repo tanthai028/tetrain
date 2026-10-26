@@ -7,10 +7,9 @@ tetrain helps you memorize the Tetris Guideline piece colors and shapes until yo
 ## Modes
 
 - **Learn:** all 7 pieces in every rotation, each in a 4×4 grid that matches how pieces spawn in the game. Hover a piece (or press and hold on a phone) for its mnemonic and a one-line description.
-- **Quiz:** three kinds of question, always at a random rotation:
-  - **Shape → Color:** a gray piece; pick its color.
-  - **Color → Shape:** a color; pick the matching gray piece.
-  - **Shape → Name:** a gray piece; pick its letter.
+- **Quiz:** two kinds of question:
+  - **Color → Shape:** a color; pick the matching gray piece, shown at a random rotation.
+  - **Shape → Letter:** a colored piece at a random rotation; pick its letter.
 
   Answers in a row build a combo, with a popup and a rising sound like line-clear combos in tetr.io, plus a block burst every 5. A wrong answer flashes the right one in color. Pieces you miss come up more often until you improve, especially J/L and S/Z mix-ups.
 
@@ -27,7 +26,7 @@ Your stats are saved in your own browser only. Clearing site data or switching b
 |-------|--------|----------|-----------|--------------------------------|
 | I     | Cyan   | icicle   | `#00F0F0` | 4 in a row                     |
 | O     | Yellow | omelet   | `#F0F000` | 2×2 square                     |
-| T     | Purple | testicle | `#A000F0` | 3 in a row, bump in the middle |
+| T     | Purple | thanos   | `#A000F0` | 3 in a row, bump in the middle |
 | S     | Green  | spinach  | `#00F000` | Zigzag, rises to the right     |
 | Z     | Red    | zit      | `#F00000` | Zigzag, rises to the left      |
 | J     | Blue   | jeans    | `#0000F0` | 3 in a row, corner on the left |
