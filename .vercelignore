@@ -3,6 +3,7 @@
 # here is publicly downloadable from tetrain.vercel.app.
 .claude/
 tests/
+docs/
 serve.js
 package.json
 README.md
